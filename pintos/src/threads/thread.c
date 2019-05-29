@@ -225,6 +225,33 @@ compare_wakeup_time (struct list_elem* a, struct list_elem* b, void* aux)
   return (list_entry(a, struct thread, elem)->wakeup_time < list_entry(b, struct thread, elem)->wakeup_time);
 }
 
+int64_t
+get_wakeup_call_time ()
+{
+  return wakeup_call_time;
+}
+
+void
+thread_wakeup (int64_t ticks)
+{
+  struct list_elem* e = list_begin(&sleep_list);
+  while(e != list_end(&sleep_list)){
+    struct thread* temp = list_entry(e, struct thread, elem);
+    if(temp->wakeup_time <= ticks){
+      e = list_remove(&temp->elem); /* point next element before remove. */
+      thread_unblock(temp);
+    }
+    else{
+      update_wakeup_call_time(temp->wakeup_time);
+      break;
+    }
+     /* point next element. */
+  }
+  if(list_size(&sleep_list) == 0){
+    update_wakeup_call_time(INT64_MAX);
+  }
+}
+
 /*  make thread sleep.  */
 void
 thread_sleep (void)
@@ -287,7 +314,7 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
-  list_push_back (&ready_list, &t->elem);
+  list_insert_ordered(&ready_list, &t->elem, compare_priority, 0);
   t->status = THREAD_READY;
   intr_set_level (old_level);
 }
