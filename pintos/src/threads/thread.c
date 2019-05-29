@@ -257,14 +257,13 @@ void
 thread_sleep (void)
 {
   struct thread *curr = thread_current ();
-  enum intr_level old_level;
+  // enum intr_level old_level;
 
-  ASSERT (!intr_context ());
-  old_level = intr_disable ();
+  // ASSERT (!intr_context ());
 
   list_insert_ordered(&sleep_list, &curr->elem, compare_wakeup_time, 0);
   thread_block();
-  intr_set_level (old_level);
+
 }
 
 void
