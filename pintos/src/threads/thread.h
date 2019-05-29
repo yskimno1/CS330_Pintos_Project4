@@ -149,6 +149,9 @@ void thread_sleep (void);
 void thread_set_wakeup_time (int64_t wakeup_time);
 void update_wakeup_call_time (int64_t wakeup_time);
 
+bool compare_wakeup_time (struct list_elem* a, struct list_elem* b, void* aux);
+bool compare_priority (struct list_elem* a, struct list_elem* b, void* aux);
+
 int thread_get_priority (void);
 void thread_set_priority (int);
 
