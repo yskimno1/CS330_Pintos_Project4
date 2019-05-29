@@ -28,6 +28,8 @@
 /* List of processes in THREAD_READY state, that is, processes
    that are ready to run but not actually running. */
 static struct list ready_list;
+static struct list sleep_list;
+
 
 /* Idle thread. */
 static struct thread *idle_thread;
@@ -210,6 +212,47 @@ thread_create (const char *name, int priority,
   return tid;
 }
 
+bool
+compare_priority (struct list_elem* a, struct list_elem* b, void* aux)
+{
+  return (list_entry(a, struct thread, elem)->priority > list_entry(b, struct thread, elem)->priority);
+}
+
+bool
+compare_wakeup_time (struct list_elem* a, struct list_elem* b, void* aux)
+{
+  return (list_entry(a, struct thread, elem)->wakeup_time < list_entry(b, struct thread, elem)->wakeup_time);
+}
+
+/*  make thread sleep.  */
+void
+thread_sleep (void)
+{
+  struct thread *curr = thread_current ();
+  enum intr_level old_level;
+
+  ASSERT (!intr_context ());
+  old_level = intr_disable ();
+
+  list_insert_ordered(&sleep_list, &curr->elem, compare_wakeup_time, 0);
+  thread_block();
+  intr_set_level (old_level);
+}
+
+void
+thread_set_wakeup_time (int64_t wakeup_time)
+{
+  thread_current ()->wakeup_time = wakeup_time;
+}
+
+void
+update_wakeup_call_time (int64_t wakeup_time)
+{
+  if(wakeup_time < wakeup_call_time) {
+    wakeup_call_time = wakeup_time;
+  }
+}
+
 /* Puts the current thread to sleep.  It will not be scheduled
    again until awoken by thread_unblock().
 
@@ -312,7 +355,7 @@ thread_yield (void)
 
   old_level = intr_disable ();
   if (curr != idle_thread) 
-    list_push_back (&ready_list, &curr->elem);
+    list_insert_ordered(&ready_list, &curr->elem, compare_priority, 0);
   curr->status = THREAD_READY;
   schedule ();
   intr_set_level (old_level);
