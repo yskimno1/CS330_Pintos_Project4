@@ -30,6 +30,7 @@
 static struct list ready_list;
 static struct list sleep_list;
 
+static int64_t wakeup_call_time = INT64_MAX;
 
 /* Idle thread. */
 static struct thread *idle_thread;
