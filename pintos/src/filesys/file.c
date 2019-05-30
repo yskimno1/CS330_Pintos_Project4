@@ -23,13 +23,11 @@ file_open (struct inode *inode)
       file->inode = inode;
       file->pos = 0;
       file->deny_write = false;
-      ASSERT(inode != NULL);
       return file;
     }
   else
     {
       inode_close (inode);
-      ASSERT(inode != NULL);
       free (file);
       return NULL; 
     }
