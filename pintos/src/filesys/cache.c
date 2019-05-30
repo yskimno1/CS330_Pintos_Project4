@@ -97,7 +97,7 @@ void cache_write(disk_sector_t sector_idx, uint8_t* buffer, off_t bytes_read, in
     struct buffer_cache* cache_e = find_cache(sector_idx);
     if(cache_e == NULL){
         if (cache_current_size < MAX_CACHE_SIZE) cache_e = allocate_new_cache(sector_idx);
-        else cache_e = evict_cache(disk_sector_t sector_idx); /* need eviction */
+        else cache_e = evict_cache(sector_idx); /* need eviction */
         cache_e->is_using = true;
         memcpy((uint8_t* )&cache_e->data + sector_ofs, buffer+bytes_read, chunk_size);
         cache_e->is_using = false;
