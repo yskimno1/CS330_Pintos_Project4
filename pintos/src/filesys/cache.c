@@ -88,7 +88,12 @@ void cache_read(disk_sector_t sector_idx, uint8_t* buffer, off_t bytes_read, int
         memcpy(buffer+bytes_read, (uint8_t* )&cache_e->data + sector_ofs, chunk_size);
         cache_e->is_using = false;
     }
-    else ASSERT(0);
+    else{
+        cache_e->is_used = true;
+        cache_e->is_using = true; /* need eviction */
+        memcpy(buffer+bytes_read, (uint8_t* )&cache_e->data + sector_ofs, chunk_size);
+        cache_e->is_using = false;
+    }
 
     return;
 }
@@ -103,7 +108,13 @@ void cache_write(disk_sector_t sector_idx, uint8_t* buffer, off_t bytes_read, in
         cache_e->is_using = false;
         cache_e->is_dirty = true;
     }
-    else ASSERT(0);
+    else{
+        cache_e->is_used = true;
+        cache_e->is_using = true;
+        memcpy((uint8_t* )&cache_e->data + sector_ofs, buffer+bytes_read, chunk_size);
+        cache_e->is_using = false;
+        cache_e->is_dirty = true;
+    }
 
     return;
 }
