@@ -49,7 +49,7 @@ struct buffer_cache* evict_cache(disk_sector_t sector_idx){
             }
         }
         for(e=list_begin(&buffer_cache_list); e!=list_end(&buffer_cache_list); e=list_next(e)){
-            cache_e = list_entry(e, sturct buffer_cache, elem);
+            cache_e = list_entry(e, struct buffer_cache, elem);
             if(cache_e->is_using) continue;
             if(cache_e->is_used) cache_e->is_used=false;
             else{ /* selected */
@@ -83,7 +83,7 @@ void cache_read(disk_sector_t sector_idx, uint8_t* buffer, off_t bytes_read, int
     struct buffer_cache* cache_e = find_cache(sector_idx);
     if(cache_e == NULL){
         if(cache_current_size < MAX_CACHE_SIZE) cache_e = allocate_new_cache(sector_idx);
-        else cache_e = evict_cache(disk_sector_t sector_idx);
+        else cache_e = evict_cache(sector_idx);
         cache_e->is_using = true; /* need eviction */
         memcpy(buffer+bytes_read, (uint8_t* )&cache_e->data + sector_ofs, chunk_size);
         cache_e->is_using = false;
