@@ -77,7 +77,8 @@ filesys_open (const char *name)
   if (dir != NULL)
     dir_lookup (dir, name, &inode);
   dir_close (dir);
-  ASSERT(0);
+
+  ASSERT(inode==NULL);
   return file_open (inode);
 }
 
