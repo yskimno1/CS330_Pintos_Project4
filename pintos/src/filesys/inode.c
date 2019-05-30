@@ -138,8 +138,8 @@ inode_open (disk_sector_t sector)
   inode->open_cnt = 1;
   inode->deny_write_cnt = 0;
   inode->removed = false;
-  
   disk_read (filesys_disk, inode->sector, &inode->data);
+  
   return inode;
 }
 
@@ -205,7 +205,7 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
   uint8_t *buffer = buffer_;
   off_t bytes_read = 0;
   uint8_t *bounce = NULL;
-
+  printf("inode read came\n");
   while (size > 0) 
     {
       /* Disk sector to read, starting byte offset within sector. */
