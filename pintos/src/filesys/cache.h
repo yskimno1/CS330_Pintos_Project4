@@ -1,5 +1,6 @@
-#include <debug.h>
+
 #include <list.h>
+
 #include <stdint.h>
 #include <stdbool.h>
 #include "filesys/off_t.h"
@@ -20,3 +21,4 @@ struct buffer_cache{
 };
 
 void cache_init(void);
+struct buffer_cache* cache_exist(disk_sector_t sector);
