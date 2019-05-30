@@ -68,7 +68,7 @@ struct buffer_cache* evict_cache(disk_sector_t sector_idx){
 }
 
 struct buffer_cache* allocate_new_cache(disk_sector_t sector_idx){
-    lock_acquire(&buffer_cache_lock);
+
     struct buffer_cache* new_cache_e = malloc(sizeof(struct buffer_cache));
     if(new_cache_e == NULL) ASSERT(0);
     list_push_back(&buffer_cache_list, &new_cache_e->elem);
@@ -80,7 +80,7 @@ struct buffer_cache* allocate_new_cache(disk_sector_t sector_idx){
     new_cache_e->is_using = true;
     disk_read(filesys_disk, sector_idx, new_cache_e->data);
     new_cache_e->is_using = false;
-    lock_release(&buffer_cache_lock);
+
     return new_cache_e;
 }
 
