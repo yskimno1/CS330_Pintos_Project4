@@ -123,12 +123,10 @@ dir_lookup (const struct dir *dir, const char *name,
 
   ASSERT (dir != NULL);
   ASSERT (name != NULL);
-  printf("dir lookup came\n");
   if (lookup (dir, name, &e, NULL))
     *inode = inode_open (e.inode_sector);
   else
     *inode = NULL;
-  printf("inode : %p\n", *inode);
   return *inode != NULL;
 }
 

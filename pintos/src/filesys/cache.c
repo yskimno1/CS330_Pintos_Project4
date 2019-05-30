@@ -20,7 +20,7 @@ void cache_init(void){
 }
 
 struct buffer_cache* find_cache(disk_sector_t sector){
-
+    
     struct buffer_cache* cache_e;
     struct list_elem* e;
     if(!list_empty(&buffer_cache_list)){
@@ -34,6 +34,7 @@ struct buffer_cache* find_cache(disk_sector_t sector){
 
 struct buffer_cache* evict_cache(disk_sector_t sector_idx){
     /* use same method as evict_frame, second-chance algorithm */
+
     struct list_elem* e;
     struct buffer_cache* cache_e;
     if(!list_empty(&buffer_cache_list)){
@@ -45,6 +46,7 @@ struct buffer_cache* evict_cache(disk_sector_t sector_idx){
                 if(cache_e->is_dirty) /*write back(write behind) */
                     disk_write(filesys_disk, cache_e->sector, &cache_e->data);
                 // list_remove(&cache_e->elem); **do not need to remove because we reuse this
+                lock_release(&buffer_cache_lock);
                 return cache_e;
             }
         }
@@ -56,6 +58,7 @@ struct buffer_cache* evict_cache(disk_sector_t sector_idx){
                 if(cache_e->is_dirty) /*write back(write behind) */
                     disk_write(filesys_disk, cache_e->sector, &cache_e->data);
                 // list_remove(&cache_e->elem); **do not need to remove because we reuse this
+                lock_release(&buffer_cache_lock);
                 return cache_e;
             }
         }
@@ -65,6 +68,7 @@ struct buffer_cache* evict_cache(disk_sector_t sector_idx){
 }
 
 struct buffer_cache* allocate_new_cache(disk_sector_t sector_idx){
+    lock_acquire(&buffer_cache_lock);
     struct buffer_cache* new_cache_e = malloc(sizeof(struct buffer_cache));
     if(new_cache_e == NULL) ASSERT(0);
     list_push_back(&buffer_cache_list, &new_cache_e->elem);
@@ -76,10 +80,12 @@ struct buffer_cache* allocate_new_cache(disk_sector_t sector_idx){
     new_cache_e->is_using = true;
     disk_read(filesys_disk, sector_idx, new_cache_e->data);
     new_cache_e->is_using = false;
+    lock_release(&buffer_cache_lock);
     return new_cache_e;
 }
 
 void cache_read(disk_sector_t sector_idx, uint8_t* buffer, off_t bytes_read, int sector_ofs, int chunk_size){
+    lock_acquire(&buffer_cache_lock);
     struct buffer_cache* cache_e = find_cache(sector_idx);
     if(cache_e == NULL){
         if(cache_current_size < MAX_CACHE_SIZE) cache_e = allocate_new_cache(sector_idx);
@@ -94,11 +100,12 @@ void cache_read(disk_sector_t sector_idx, uint8_t* buffer, off_t bytes_read, int
         memcpy(buffer+bytes_read, (uint8_t* )&cache_e->data + sector_ofs, chunk_size);
         cache_e->is_using = false;
     }
-
+    lock_release(&buffer_cache_lock);
     return;
 }
 
 void cache_write(disk_sector_t sector_idx, uint8_t* buffer, off_t bytes_read, int sector_ofs, int chunk_size){
+    lock_acquire(&buffer_cache_lock);
     struct buffer_cache* cache_e = find_cache(sector_idx);
     if(cache_e == NULL){
         if (cache_current_size < MAX_CACHE_SIZE) cache_e = allocate_new_cache(sector_idx);
@@ -115,7 +122,7 @@ void cache_write(disk_sector_t sector_idx, uint8_t* buffer, off_t bytes_read, in
         cache_e->is_using = false;
         cache_e->is_dirty = true;
     }
-
+    lock_release(&buffer_cache_lock);
     return;
 }
 
