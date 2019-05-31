@@ -361,11 +361,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
     {
       if (file_read (file, &ehdr, sizeof ehdr) != sizeof ehdr) ASSERT(0);
       if (memcmp (ehdr.e_ident, "\177ELF\1\1\1", 7)) ASSERT(0);
-      if(ehdr.e_type != 2) ASSERT(0);
-      if(ehdr.e_machine != 3) ASSERT(0);
-      if(ehdr.e_version != 1) ASSERT(0);
-      if(ehdr.e_phentsize != sizeof (struct Elf32_Phdr)) ASSERT(0);
-      if(ehdr.e_phnum > 1024) ASSERT(0);
+
       printf ("load: %s: error loading executable\n", (char *)argv[0]);
       goto done; 
     }

@@ -40,6 +40,7 @@ struct inode
     // struct inode_disk data;             /* Inode content. */
 
     off_t length;
+    off_t length_max;
     disk_sector_t start;
   };
 
@@ -145,6 +146,7 @@ inode_open (disk_sector_t sector)
   struct inode_disk inode_disk;
   disk_read (filesys_disk, inode->sector, &inode_disk);
   inode->length = inode_disk.length;
+  inode->length_max = inode_disk.length;
   inode->start = inode_disk.start;
 
   return inode;
@@ -195,7 +197,7 @@ inode_close (struct inode *inode)
         inode_disk->length = inode->length;
         inode_disk->start = inode->start;
         disk_write(filesys_disk, inode->sector, inode_disk);
-        
+
         free(inode_disk);
       }
       free (inode); 
@@ -217,8 +219,10 @@ inode_remove (struct inode *inode)
 off_t
 inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset) 
 {
+  if(inode->length_max <= offset) return 0;
   uint8_t *buffer = buffer_;
   off_t bytes_read = 0;
+
 
   while (size > 0) 
     {
@@ -227,7 +231,7 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
       int sector_ofs = offset % DISK_SECTOR_SIZE;
 
       /* Bytes left in inode, bytes left in sector, lesser of the two. */
-      off_t inode_left = inode_length (inode) - offset;
+      off_t inode_left = inode->length_max - offset;
       int sector_left = DISK_SECTOR_SIZE - sector_ofs;
       int min_left = inode_left < sector_left ? inode_left : sector_left;
 
@@ -326,7 +330,9 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
       //     memcpy (bounce + sector_ofs, buffer + bytes_written, chunk_size);
       //     disk_write (filesys_disk, sector_idx, bounce); 
       //   }
-
+      if(inode->length_max+chunk_size > inode_length(inode))  inode->length_max = inode_length(inode);
+      else inode->length_max += chunk_size;
+      
       /* Advance. */
       size -= chunk_size;
       offset += chunk_size;
