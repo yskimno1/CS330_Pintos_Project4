@@ -46,6 +46,10 @@ struct buffer_cache* evict_cache(disk_sector_t sector_idx){
                 if(cache_e->is_dirty) /*write back(write behind) */
                     disk_write(filesys_disk, cache_e->sector, &cache_e->data);
                 // list_remove(&cache_e->elem); **do not need to remove because we reuse this
+                cache_e->is_using = true;
+                cache_e->sector = sector_idx;
+                disk_read(filesys_disk, cache_e->sector, &cache_e->data);
+                cache_e->is_dirty = false;
 
                 return cache_e;
             }
@@ -58,6 +62,10 @@ struct buffer_cache* evict_cache(disk_sector_t sector_idx){
                 if(cache_e->is_dirty) /*write back(write behind) */
                     disk_write(filesys_disk, cache_e->sector, &cache_e->data);
                 // list_remove(&cache_e->elem); **do not need to remove because we reuse this
+                cache_e->is_using = true;
+                cache_e->sector = sector_idx;
+                disk_read(filesys_disk, cache_e->sector, &cache_e->data);
+                cache_e->is_dirty = false;
 
                 return cache_e;
             }
@@ -90,6 +98,8 @@ void cache_read(disk_sector_t sector_idx, uint8_t* buffer, off_t bytes_read, int
     if(cache_e == NULL){
         if(cache_current_size < MAX_CACHE_SIZE) cache_e = allocate_new_cache(sector_idx);
         else cache_e = evict_cache(sector_idx);
+        ASSERT(cache_e != NULL);
+        
         cache_e->is_using = true; /* need eviction */
         lock_release(&buffer_cache_lock);
         memcpy(buffer+bytes_read, (uint8_t* )&cache_e->data + sector_ofs, chunk_size);
@@ -112,6 +122,8 @@ void cache_write(disk_sector_t sector_idx, uint8_t* buffer, off_t bytes_read, in
     if(cache_e == NULL){
         if (cache_current_size < MAX_CACHE_SIZE) cache_e = allocate_new_cache(sector_idx);
         else cache_e = evict_cache(sector_idx); /* need eviction */
+        ASSERT(cache_e != NULL);
+
         cache_e->is_using = true;
         lock_release(&buffer_cache_lock);
         memcpy((uint8_t* )&cache_e->data + sector_ofs, buffer+bytes_read, chunk_size);
