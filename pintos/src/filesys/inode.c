@@ -189,7 +189,15 @@ inode_close (struct inode *inode)
           free_map_release (inode->start,
                             bytes_to_sectors (inode->length)); 
         }
+      else{
+        struct inode_disk* inode_disk = malloc(sizeof(struct inode_disk));
 
+        inode_disk->length = inode->length;
+        inode_disk->start = inode->start;
+        disk_write(filesys_disk, inode->sector, inode_disk);
+        
+        free(inode_disk);
+      }
       free (inode); 
     }
 }

@@ -359,6 +359,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
       || ehdr.e_phentsize != sizeof (struct Elf32_Phdr)
       || ehdr.e_phnum > 1024) 
     {
+      if (file_read (file, &ehdr, sizeof ehdr) != sizeof ehdr) ASSERT(0);
       printf ("load: %s: error loading executable\n", (char *)argv[0]);
       goto done; 
     }
