@@ -37,7 +37,10 @@ struct inode
     int open_cnt;                       /* Number of openers. */
     bool removed;                       /* True if deleted, false otherwise. */
     int deny_write_cnt;                 /* 0: writes ok, >0: deny writes. */
-    struct inode_disk data;             /* Inode content. */
+    // struct inode_disk data;             /* Inode content. */
+
+    off_t length;
+    disk_sector_t start;
   };
 
 /* Returns the disk sector that contains byte offset POS within
@@ -48,8 +51,8 @@ static disk_sector_t
 byte_to_sector (const struct inode *inode, off_t pos) 
 {
   ASSERT (inode != NULL);
-  if (pos < inode->data.length)
-    return inode->data.start + pos / DISK_SECTOR_SIZE;
+  if (pos < inode->length)
+    return inode->start + pos / DISK_SECTOR_SIZE;
   else
     return -1;
 }
@@ -138,8 +141,12 @@ inode_open (disk_sector_t sector)
   inode->open_cnt = 1;
   inode->deny_write_cnt = 0;
   inode->removed = false;
-  disk_read (filesys_disk, inode->sector, &inode->data);
-  
+
+  struct inode_disk inode_disk;
+  disk_read (filesys_disk, inode->sector, &inode_disk);
+  inode->length = inode_disk.length;
+  inode->start = inode_disk.start;
+
   return inode;
 }
 
@@ -179,8 +186,8 @@ inode_close (struct inode *inode)
       if (inode->removed) 
         {
           free_map_release (inode->sector, 1);
-          free_map_release (inode->data.start,
-                            bytes_to_sectors (inode->data.length)); 
+          free_map_release (inode->start,
+                            bytes_to_sectors (inode->length)); 
         }
 
       free (inode); 
@@ -204,7 +211,6 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
 {
   uint8_t *buffer = buffer_;
   off_t bytes_read = 0;
-  uint8_t *bounce = NULL;
 
   while (size > 0) 
     {
@@ -318,7 +324,7 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
       offset += chunk_size;
       bytes_written += chunk_size;
     }
-  // free (bounce);
+  // free (boungce);
 
   return bytes_written;
 }
@@ -347,5 +353,5 @@ inode_allow_write (struct inode *inode)
 off_t
 inode_length (const struct inode *inode)
 {
-  return inode->data.length;
+  return inode->length;
 }
