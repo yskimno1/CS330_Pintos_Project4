@@ -61,7 +61,7 @@ struct inode
 static disk_sector_t
 byte_to_sector (const struct inode *inode, off_t pos) 
 {
-  printf("pos : %d, sector: %d\n", pos, inode->ptrs[pos/DISK_SECTOR_SIZE]);
+  // printf("pos : %d, sector: %d\n", pos, inode->ptrs[pos/DISK_SECTOR_SIZE]);
   ASSERT (inode != NULL);
   if (pos < inode->length)
     return inode->ptrs[pos/DISK_SECTOR_SIZE];
