@@ -88,7 +88,6 @@ inode_init (void)
 bool
 inode_create (disk_sector_t sector, off_t length)
 {
-  printf("inode create start\n");
   struct inode_disk *disk_inode = NULL;
   bool success = false;
 
@@ -116,7 +115,6 @@ inode_create (disk_sector_t sector, off_t length)
       memcpy(&(disk_inode->ptrs), &(inode->ptrs), sizeof(disk_sector_t) * NUM_PTRS);
       free(inode);
 
-      printf("disk write start\n");
       disk_write(filesys_disk, sector, disk_inode);
       disk_inode -> is_allocated = 1;
       success = true;
@@ -139,7 +137,7 @@ inode_create (disk_sector_t sector, off_t length)
       //   } 
       free (disk_inode);
     }
-  printf("inode create done\n");
+
   return success;
 }
 
@@ -148,15 +146,15 @@ void inode_grow(struct inode* inode, off_t length){
   char data_default[DISK_SECTOR_SIZE];
 
   size_t sectors = bytes_to_sectors(length) - bytes_to_sectors(inode->length);
-  printf("sectors : %d\n", sectors);
+
   int index=0;
   for(; index<NUM_PTRS; index++){
-    printf("for loop start\n");
+
     if(!(sectors > 0)) break;
-    free_map_allocate(1, inode->ptrs[index]);
+    free_map_allocate(1, &inode->ptrs[index]);
     disk_write(filesys_disk, inode->ptrs[index], data_default);
     sectors -= 1;
-    printf("for loop done\n");
+
   }
   
   inode->is_allocated = 1;
