@@ -63,7 +63,8 @@ byte_to_sector (const struct inode *inode, off_t pos)
 {
   ASSERT (inode != NULL);
   if (pos < inode->length)
-    return inode->start + pos / DISK_SECTOR_SIZE;
+    return inode->ptrs[pos/DISK_SECTOR_SIZE];
+    // return inode->start + pos / DISK_SECTOR_SIZE;
   else
     return -1;
 }
@@ -106,6 +107,9 @@ inode_create (disk_sector_t sector, off_t length)
       struct inode* inode = malloc(sizeof(struct inode));
       inode->length = 0;
       inode->is_allocated = 0;
+
+      inode_grow(inode, length);
+
       memcpy(&(disk_inode->start), &(inode->start), sizeof(disk_sector_t));
       memcpy(&(disk_inode->ptrs), &(inode->ptrs), sizeof(disk_sector_t) * NUM_PTRS);
       free(inode);
@@ -131,6 +135,24 @@ inode_create (disk_sector_t sector, off_t length)
       free (disk_inode);
     }
   return success;
+}
+
+void inode_grow(struct inode* inode, off_t length){
+
+  char data_default[DISK_SECTOR_SIZE];
+
+  size_t sectors = bytes_to_sectors(length) - bytes_to_sectors(inode->length);
+  
+  int index=0;
+  for(; index<NUM_PTRS; index++){
+    if(!(sectors > 0)) break;
+    free_map_allocate(1, inode->ptrs[index]);
+    disk_write(filesys_disk, inode->ptrs[index], data_default);
+    sectors -= 1;
+  }
+  
+  inode->is_allocated = 1;
+  return;
 }
 
 /* Reads an inode from SECTOR
