@@ -144,7 +144,7 @@ inode_create (disk_sector_t sector, off_t length)
 
 void inode_grow(struct inode* inode, off_t length){
 
-  char data_default[DISK_SECTOR_SIZE];
+  static char data_default[DISK_SECTOR_SIZE];
 
   size_t sectors = bytes_to_sectors(length) - bytes_to_sectors(inode->length);
 
