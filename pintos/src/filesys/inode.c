@@ -88,6 +88,7 @@ inode_init (void)
 bool
 inode_create (disk_sector_t sector, off_t length)
 {
+  printf("inode create start\n");
   struct inode_disk *disk_inode = NULL;
   bool success = false;
 
@@ -137,6 +138,7 @@ inode_create (disk_sector_t sector, off_t length)
       //   } 
       free (disk_inode);
     }
+  printf("inode create done\n");
   return success;
 }
 
