@@ -262,6 +262,7 @@ inode_close (struct inode *inode)
         inode_disk->length = inode->length;
         inode_disk->start = inode->start;
         inode_disk->is_allocated = inode->is_allocated;
+        memcpy(&(inode_disk->ptrs), &(inode->ptrs), sizeof(disk_sector_t) * NUM_PTRS);
         disk_write(filesys_disk, inode->sector, inode_disk);
 
         free(inode_disk);
