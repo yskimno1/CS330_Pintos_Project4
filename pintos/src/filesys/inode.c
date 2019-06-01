@@ -104,6 +104,7 @@ inode_create (disk_sector_t sector, off_t length)
       disk_inode->length = length;
       disk_inode->magic = INODE_MAGIC;
 
+      /* need to allocate */
       struct inode* inode = malloc(sizeof(struct inode));
       inode->length = 0;
       inode->is_allocated = 0;
@@ -115,7 +116,9 @@ inode_create (disk_sector_t sector, off_t length)
       free(inode);
 
       disk_write(filesys_disk, sector, disk_inode);
+      disk_inode -> is_allocated = 1;
       success = true;
+      /* allocate done */
 
       // size_t sectors = bytes_to_sectors (length);
 
@@ -234,7 +237,8 @@ inode_close (struct inode *inode)
         {
           free_map_release (inode->sector, 1);
           size_t sectors = bytes_to_sectors(inode_length(inode));
-          if(sectors != 0){ /* need to deallocate */
+          /* need to deallocate */
+          if(sectors != 0){
             int index = 0;
             for(; index<NUM_PTRS; index++){
               if(sectors == 0) break;
@@ -242,6 +246,8 @@ inode_close (struct inode *inode)
               sectors -= 1;
             }
           }
+          /* deallocate done */
+
           // free_map_release (inode->start,
           //                   bytes_to_sectors (inode->length)); 
         }
