@@ -10,7 +10,7 @@
 
 /* Identifies an inode. */
 #define INODE_MAGIC 0x494e4f44
-#define NUM_PTRS 14 // 15-1 in lecture note
+#define NUM_PTRS 124 // 15-1 in lecture note
 #define FILE_SIZE_MAX 1<<23
 
 /* On-disk inode.
@@ -24,7 +24,7 @@ struct inode_disk
     disk_sector_t start;                /* First data sector. */
     disk_sector_t ptrs[NUM_PTRS];
 
-    uint32_t unused[110];               /* Not used. */
+    // uint32_t unused[110];               /* Not used. */
   };
 
 /* Returns the number of sectors to allocate for an inode SIZE
@@ -115,9 +115,9 @@ inode_create (disk_sector_t sector, off_t length)
       memcpy(&(disk_inode->start), &(inode->start), sizeof(disk_sector_t));
       memcpy(&(disk_inode->ptrs), &(inode->ptrs), sizeof(disk_sector_t) * NUM_PTRS);
       free(inode);
-
-      disk_write(filesys_disk, sector, disk_inode);
       disk_inode -> is_allocated = 1;
+      disk_write(filesys_disk, sector, disk_inode);
+
       success = true;
       /* allocate done */
 
