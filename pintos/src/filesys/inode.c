@@ -109,13 +109,14 @@ inode_create (disk_sector_t sector, off_t length)
       struct inode* inode = malloc(sizeof(struct inode));
       inode->length = 0;
       inode->is_allocated = 0;
-
+      printf("grow start\n");
       inode_grow(inode, length);
-
+      printf("grow done\n");
       memcpy(&(disk_inode->start), &(inode->start), sizeof(disk_sector_t));
       memcpy(&(disk_inode->ptrs), &(inode->ptrs), sizeof(disk_sector_t) * NUM_PTRS);
       free(inode);
 
+      printf("disk write start\n");
       disk_write(filesys_disk, sector, disk_inode);
       disk_inode -> is_allocated = 1;
       success = true;
