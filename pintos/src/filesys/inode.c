@@ -195,13 +195,14 @@ inode_open (disk_sector_t sector)
   inode->deny_write_cnt = 0;
   inode->removed = false;
 
-  struct inode_disk* inode_disk;
+  struct inode_disk* inode_disk = malloc(sizeof(struct inode_disk));
   disk_read (filesys_disk, inode->sector, inode_disk);
   inode->length = inode_disk->length;
   inode->length_shown = inode_disk->length;
   inode->start = inode_disk->start;
   inode->is_allocated = inode_disk->is_allocated;
   memcpy(&(inode->ptrs), &(inode_disk->ptrs), sizeof(disk_sector_t) * NUM_PTRS );
+  free(inode_disk);
   return inode;
 }
 
