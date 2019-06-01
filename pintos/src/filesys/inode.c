@@ -61,7 +61,7 @@ struct inode
 static disk_sector_t
 byte_to_sector (const struct inode *inode, off_t pos) 
 {
-  printf("sector: %d\n", inode->ptrs[pos/DISK_SECTOR_SIZE]);
+  printf("pos : %d, sector: %d\n", pos, inode->ptrs[pos/DISK_SECTOR_SIZE]);
   ASSERT (inode != NULL);
   if (pos < inode->length)
     return inode->ptrs[pos/DISK_SECTOR_SIZE];
@@ -195,13 +195,13 @@ inode_open (disk_sector_t sector)
   inode->deny_write_cnt = 0;
   inode->removed = false;
 
-  struct inode_disk inode_disk;
-  disk_read (filesys_disk, inode->sector, &inode_disk);
-  inode->length = inode_disk.length;
-  inode->length_shown = inode_disk.length;
-  inode->start = inode_disk.start;
-  inode->is_allocated = inode_disk.is_allocated;
-  memcpy(&(inode->ptrs), &(inode_disk.ptrs), sizeof(disk_sector_t) * NUM_PTRS );
+  struct inode_disk* inode_disk;
+  disk_read (filesys_disk, inode->sector, inode_disk);
+  inode->length = inode_disk->length;
+  inode->length_shown = inode_disk->length;
+  inode->start = inode_disk->start;
+  inode->is_allocated = inode_disk->is_allocated;
+  memcpy(&(inode->ptrs), &(inode_disk->ptrs), sizeof(disk_sector_t) * NUM_PTRS );
   return inode;
 }
 

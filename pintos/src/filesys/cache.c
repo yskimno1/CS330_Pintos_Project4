@@ -86,6 +86,7 @@ struct buffer_cache* allocate_new_cache(disk_sector_t sector_idx){
     new_cache_e->is_dirty = false;
 
     new_cache_e->is_using = true;
+
     disk_read(filesys_disk, sector_idx, new_cache_e->data);
     new_cache_e->is_using = false;
 
