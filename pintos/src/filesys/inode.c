@@ -81,6 +81,26 @@ inode_init (void)
   list_init (&open_inodes);
 }
 
+void inode_grow(struct inode* inode, off_t length){
+
+  static char data_default[DISK_SECTOR_SIZE];
+
+  size_t sectors = bytes_to_sectors(length) - bytes_to_sectors(inode->length);
+
+  int index=0;
+  for(; index<NUM_PTRS; index++){
+
+    if(!(sectors > 0)) break;
+    free_map_allocate(1, &inode->ptrs[index]);
+    disk_write(filesys_disk, inode->ptrs[index], data_default);
+    sectors -= 1;
+
+  }
+  
+  inode->is_allocated = 1;
+  return;
+}
+
 /* Initializes an inode with LENGTH bytes of data and
    writes the new inode to sector SECTOR on the file system
    disk.
@@ -140,26 +160,6 @@ inode_create (disk_sector_t sector, off_t length)
     }
 
   return success;
-}
-
-void inode_grow(struct inode* inode, off_t length){
-
-  static char data_default[DISK_SECTOR_SIZE];
-
-  size_t sectors = bytes_to_sectors(length) - bytes_to_sectors(inode->length);
-
-  int index=0;
-  for(; index<NUM_PTRS; index++){
-
-    if(!(sectors > 0)) break;
-    free_map_allocate(1, &inode->ptrs[index]);
-    disk_write(filesys_disk, inode->ptrs[index], data_default);
-    sectors -= 1;
-
-  }
-  
-  inode->is_allocated = 1;
-  return;
 }
 
 /* Reads an inode from SECTOR
@@ -334,7 +334,7 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
 
   if (inode->deny_write_cnt)
     return 0;
-
+  int i=0;
   while (size > 0) 
     {
       /* Sector to write, starting byte offset within sector. */
@@ -345,6 +345,10 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
       off_t inode_left = inode_length (inode) - offset;
       int sector_left = DISK_SECTOR_SIZE - sector_ofs;
       int min_left = inode_left < sector_left ? inode_left : sector_left;
+
+      printf("%d, size %d: sector: %d-%d=%d, inode: %d-%d=%d, min_left=%d, sector_idx=%d\n",
+              i,size, DISK_SECTOR_SIZE,sector_ofs,sector_left, inode_length (inode),offset,inode_left, min_left, sector_idx);
+
 
       /* Number of bytes to actually write into this sector. */
       int chunk_size = size < min_left ? size : min_left;
@@ -360,6 +364,8 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
       size -= chunk_size;
       offset += chunk_size;
       bytes_written += chunk_size;
+
+      i = i+1;
     }
 
   return bytes_written;
