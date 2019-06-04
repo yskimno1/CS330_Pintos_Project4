@@ -73,9 +73,22 @@ static disk_sector_t
 byte_to_sector (const struct inode *inode, off_t pos) 
 {
   // printf("pos : %d, sector: %d\n", pos, inode->ptrs[pos/DISK_SECTOR_SIZE]);
+  int new_pos;
+  unsigned idx_ptr;
   ASSERT (inode != NULL);
-  if (pos < inode->length)
-    return inode->ptrs[pos/DISK_SECTOR_SIZE];
+  if(pos < inode_length(inode)){
+    if(pos < DISK_SECTOR_SIZE*NUM_PTRS_DIR) return inode->ptrs[pos/DISK_SECTOR_SIZE];
+    new_pos = pos - DISK_SECTOR_SIZE*NUM_PTRS_DIR;
+
+    if (new_pos < DISK_SECTOR_SIZE*(NUM_PTRS_INDIR * PTR_PER_BLOCK)){
+      idx_ptr = NUM_PTRS_DIR + (new_pos / DISK_SECTOR_SIZE / NUM_PTRS_INDIR);
+      new_pos = new_pos % (DISK_SECTOR_SIZE*NUM_PTRS_INDIR);
+      disk_sector_t inner_ptr[PTR_PER_BLOCK];
+      disk_read(filesys_disk, inode->ptrs[idx_ptr], &inner_ptr);
+      return inner_ptr[pos/DISK_SECTOR_SIZE];
+    }
+    else ASSERT(0);
+  }
     // return inode->start + pos / DISK_SECTOR_SIZE;
   else
     return -1;
@@ -378,6 +391,7 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
     return 0;
 
   if(size+offset > inode_length(inode)){
+    printf("need to grow about %d!\n", size+offset);
     inode_grow(inode, size+offset);
     inode->length = size+offset;
   }
