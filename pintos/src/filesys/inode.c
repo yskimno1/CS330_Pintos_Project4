@@ -123,7 +123,7 @@ void inode_grow(struct inode* inode, off_t length){
       sectors -= 1;
       idx += 1;
     }
-    else if(idx<+NUM_PTRS_DIR + NUM_PTRS_INDIR){
+    else if(idx<NUM_PTRS_DIR + NUM_PTRS_INDIR){
 
       if(inode->indir_idx==0) free_map_allocate(1, &inode->ptrs[idx]);
       else disk_read(filesys_disk, inode->ptrs[idx], &inner_ptr);
