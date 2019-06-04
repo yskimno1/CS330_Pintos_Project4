@@ -11,9 +11,9 @@
 /* Identifies an inode. */
 #define INODE_MAGIC 0x494e4f44
 
-#define NUM_PTRS 14
+#define NUM_PTRS 114
 #define NUM_PTRS_DIR 5
-#define NUM_PTRS_INDIR 9
+#define NUM_PTRS_INDIR 109
 #define NUM_PTRS_DOUBLE 0
 
 #define FILE_SIZE_MAX 1<<23
@@ -33,7 +33,7 @@ struct inode_disk
     unsigned ptr_idx;
     unsigned indir_idx;
 
-    uint32_t unused[108];               /* Not used. */
+    uint32_t unused[8];               /* Not used. */
   };
 
 /* Returns the number of sectors to allocate for an inode SIZE
