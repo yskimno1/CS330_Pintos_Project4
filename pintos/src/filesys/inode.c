@@ -392,7 +392,7 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
       int chunk_size = size < min_left ? size : min_left;
       if (chunk_size <= 0)
         break;
-
+      printf("sector idx in read : %d\n", sector_idx);
       cache_read(sector_idx, buffer, bytes_read, sector_ofs, chunk_size);
     
       /* Advance. */
@@ -446,7 +446,7 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
       int chunk_size = size < min_left ? size : min_left;
       if (chunk_size <= 0)
         break;
-
+      printf("sector idx in write : %d\n", sector_idx);
       cache_write(sector_idx, buffer, bytes_written, sector_ofs, chunk_size);
 
       if(inode->length_shown + chunk_size > inode_length(inode))  inode->length_shown = inode_length(inode);
