@@ -90,7 +90,7 @@ byte_to_sector (const struct inode *inode, off_t pos)
       disk_sector_t inner_ptr[PTR_PER_BLOCK];
       printf("byte to sector, sector : %d\n", inode->ptrs[idx_ptr]);
       disk_read(filesys_disk, inode->ptrs[idx_ptr], &inner_ptr);
-      return inner_ptr[pos/DISK_SECTOR_SIZE];
+      return inner_ptr[new_pos/DISK_SECTOR_SIZE];
     }
     else ASSERT(0);
   }
