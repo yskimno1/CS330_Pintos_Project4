@@ -112,7 +112,7 @@ byte_to_sector (const struct inode *inode, off_t pos)
   }
     // return inode->start + pos / DISK_SECTOR_SIZE;
   else{
-    printf("here..\n");
+    // printf("here..\n");
     return -1;
   }
 }
