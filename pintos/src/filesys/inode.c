@@ -129,10 +129,11 @@ void inode_grow(struct inode* inode, off_t length){
       else disk_read(filesys_disk, inode->ptrs[idx], &inner_ptr);
 
       unsigned indir_idx = inode->indir_idx;
-      for(; indir_idx<PTR_PER_BLOCK; indir_idx++){
+      while(indir_idx<PTR_PER_BLOCK){
         if(!(sectors > 0)) break;
         free_map_allocate(1, &inner_ptr[indir_idx]);
         disk_write(filesys_disk, inner_ptr[indir_idx], data_default);
+
         indir_idx += 1;
         sectors -= 1;
       }
@@ -143,6 +144,9 @@ void inode_grow(struct inode* inode, off_t length){
         inode->indir_idx = 0;
         idx += 1;
       } // yunseong
+      else{
+        ASSERT(sectors ==0);
+      }
     }
     
   }
