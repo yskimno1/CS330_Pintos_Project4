@@ -78,9 +78,10 @@ byte_to_sector (const struct inode *inode, off_t pos)
   ASSERT (inode != NULL);
   if(pos < inode_length(inode)){
     if(pos < DISK_SECTOR_SIZE*NUM_PTRS_DIR) return inode->ptrs[pos/DISK_SECTOR_SIZE];
+    
     new_pos = pos - DISK_SECTOR_SIZE*NUM_PTRS_DIR;
-
     if (new_pos < DISK_SECTOR_SIZE*(NUM_PTRS_INDIR * PTR_PER_BLOCK)){
+      printf("came\n");
       idx_ptr = NUM_PTRS_DIR + (new_pos / DISK_SECTOR_SIZE / NUM_PTRS_INDIR);
       new_pos = new_pos % (DISK_SECTOR_SIZE*NUM_PTRS_INDIR);
       disk_sector_t inner_ptr[PTR_PER_BLOCK];
@@ -113,7 +114,7 @@ void inode_grow(struct inode* inode, off_t length){
   size_t sectors = bytes_to_sectors(length) - bytes_to_sectors(inode->length);
 
   unsigned idx = inode->ptr_idx;
-  for(; idx<NUM_PTRS; idx++){
+  while(idx<NUM_PTRS){
     if(!(sectors > 0)) break;
 
     if(idx<NUM_PTRS_DIR){
@@ -223,7 +224,7 @@ inode_open (disk_sector_t sector)
   struct list_elem *e;
   struct inode *inode;
 
-  // printf("sector : %d\n", sector);
+  printf("sector : %d\n", sector);
   /* Check whether this inode is already open. */
   for (e = list_begin (&open_inodes); e != list_end (&open_inodes);
        e = list_next (e)) 
