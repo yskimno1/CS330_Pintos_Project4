@@ -254,6 +254,7 @@ inode_open (disk_sector_t sector)
   inode->removed = false;
 
   struct inode_disk* inode_disk = malloc(sizeof(struct inode_disk));
+  printf("sector : %d %d\n", inode->sector, sector);
   disk_read (filesys_disk, inode->sector, inode_disk);
   inode->length = inode_disk->length;
   inode->length_shown = inode_disk->length;

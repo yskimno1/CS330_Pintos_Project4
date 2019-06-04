@@ -226,7 +226,7 @@ disk_read (struct disk *d, disk_sector_t sec_no, void *buffer)
 
   c = d->channel;
   lock_acquire (&c->lock);
-  printf("disk cap : %d, sec no : %d\n", d->capacity, sec_no);
+  // printf("disk cap : %d, sec no : %d\n", d->capacity, sec_no);
   select_sector (d, sec_no);
   issue_pio_command (c, CMD_READ_SECTOR_RETRY);
   sema_down (&c->completion_wait);
