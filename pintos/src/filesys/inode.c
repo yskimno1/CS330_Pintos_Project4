@@ -451,7 +451,7 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
       /* Number of bytes to actually write into this sector. */
       int chunk_size = size < min_left ? size : min_left;
       if (chunk_size <= 0)
-      //   break;
+        break;
       // printf("sector idx in write : %d\n", sector_idx);
       cache_write(sector_idx, buffer, bytes_written, sector_ofs, chunk_size);
 
