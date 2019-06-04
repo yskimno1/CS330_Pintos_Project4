@@ -85,6 +85,7 @@ byte_to_sector (const struct inode *inode, off_t pos)
       idx_ptr = NUM_PTRS_DIR + (new_pos / DISK_SECTOR_SIZE / NUM_PTRS_INDIR);
       new_pos = new_pos % (DISK_SECTOR_SIZE*NUM_PTRS_INDIR);
       disk_sector_t inner_ptr[PTR_PER_BLOCK];
+      printf("byte to sector, sector : %d\n", inode->ptrs[idx_ptr]);
       disk_read(filesys_disk, inode->ptrs[idx_ptr], &inner_ptr);
       return inner_ptr[pos/DISK_SECTOR_SIZE];
     }
@@ -126,7 +127,10 @@ void inode_grow(struct inode* inode, off_t length){
     else if(idx<NUM_PTRS_DIR + NUM_PTRS_INDIR){
 
       if(inode->indir_idx==0) free_map_allocate(1, &inode->ptrs[idx]);
-      else disk_read(filesys_disk, inode->ptrs[idx], &inner_ptr);
+      else{
+        printf("grow, sector : %d\n", inode->ptrs[idx]);
+        disk_read(filesys_disk, inode->ptrs[idx], &inner_ptr);
+      }
 
       unsigned indir_idx = inode->indir_idx;
       while(indir_idx<PTR_PER_BLOCK){

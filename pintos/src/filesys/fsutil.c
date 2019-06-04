@@ -102,6 +102,7 @@ fsutil_put (char **argv)
     PANIC ("couldn't open source disk (hdc or hd1:0)");
 
   /* Read file size. */
+  printf("fsutil.c, sector : %d\n", sector);
   disk_read (src, sector++, buffer);
   if (memcmp (buffer, "PUT", 4))
     PANIC ("%s: missing PUT signature on scratch disk", file_name);
@@ -119,6 +120,8 @@ fsutil_put (char **argv)
   /* Do copy. */
   while (size > 0)
     {
+
+      printf("fsutil.c while loop, sector : %d\n", sector);
       int chunk_size = size > DISK_SECTOR_SIZE ? DISK_SECTOR_SIZE : size;
       disk_read (src, sector++, buffer);
       if (file_write (dst, buffer, chunk_size) != chunk_size)
