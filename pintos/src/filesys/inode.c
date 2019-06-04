@@ -77,7 +77,10 @@ byte_to_sector (const struct inode *inode, off_t pos)
   unsigned idx_ptr;
   ASSERT (inode != NULL);
   if(pos < inode_length(inode)){
-    if(pos < DISK_SECTOR_SIZE*NUM_PTRS_DIR) return inode->ptrs[pos/DISK_SECTOR_SIZE];
+    if(pos < DISK_SECTOR_SIZE*NUM_PTRS_DIR){
+      printf("result : %d\n", pos/DISK_SECTOR_SIZE);
+      return inode->ptrs[pos/DISK_SECTOR_SIZE];
+    }
     
     new_pos = pos - DISK_SECTOR_SIZE*NUM_PTRS_DIR;
     if (new_pos < DISK_SECTOR_SIZE*(NUM_PTRS_INDIR * PTR_PER_BLOCK)){
@@ -92,8 +95,10 @@ byte_to_sector (const struct inode *inode, off_t pos)
     else ASSERT(0);
   }
     // return inode->start + pos / DISK_SECTOR_SIZE;
-  else
+  else{
+    printf("here..\n");
     return -1;
+  }
 }
 
 /* List of open inodes, so that opening a single inode twice
@@ -430,6 +435,7 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
   while (size > 0) 
     {
       /* Sector to write, starting byte offset within sector. */
+      printf("inode length : %d, offset : %d\n", inode_length(inode), offset);
       disk_sector_t sector_idx = byte_to_sector (inode, offset);
       int sector_ofs = offset % DISK_SECTOR_SIZE;
 
