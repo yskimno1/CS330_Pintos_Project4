@@ -112,7 +112,7 @@ void inode_grow(struct inode* inode, off_t length){
   static char data_default[DISK_SECTOR_SIZE];
 
   size_t sectors = bytes_to_sectors(length) - bytes_to_sectors(inode->length);
-  printf("grow sectors : %d\n", sectors);
+  printf("grow sectors : %d, %d - %d\n", sectors, length, inode->length);
   unsigned idx = inode->ptr_idx;
   while(idx<NUM_PTRS){
     if(!(sectors > 0)) break;
