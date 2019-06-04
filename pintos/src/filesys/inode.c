@@ -221,7 +221,7 @@ inode_open (disk_sector_t sector)
   struct list_elem *e;
   struct inode *inode;
 
-  printf("sector : %d\n", sector);
+  // printf("sector : %d\n", sector);
   /* Check whether this inode is already open. */
   for (e = list_begin (&open_inodes); e != list_end (&open_inodes);
        e = list_next (e)) 
@@ -391,7 +391,7 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
     return 0;
 
   if(size+offset > inode_length(inode)){
-    printf("need to grow about %d!\n", size+offset);
+    // printf("need to grow about %d!\n", size+offset);
     inode_grow(inode, size+offset);
     inode->length = size+offset;
   }

@@ -34,7 +34,7 @@ dir_create (disk_sector_t sector, size_t entry_cnt)
 struct dir *
 dir_open (struct inode *inode) 
 {
-  printf("dir open\n");
+  // printf("dir open\n");
   struct dir *dir = calloc (1, sizeof *dir);
   if (inode != NULL && dir != NULL)
     {
@@ -55,7 +55,7 @@ dir_open (struct inode *inode)
 struct dir *
 dir_open_root (void)
 {
-  printf("open root\n");
+  // printf("open root\n");
   return dir_open (inode_open (ROOT_DIR_SECTOR));
 }
 
@@ -65,7 +65,7 @@ struct dir *
 dir_reopen (struct dir *dir) 
 {
 
-  printf("reopen\n");
+  // printf("reopen\n");
   return dir_open (inode_reopen (dir->inode));
 }
 
