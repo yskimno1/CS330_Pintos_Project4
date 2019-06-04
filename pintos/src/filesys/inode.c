@@ -120,8 +120,9 @@ void inode_grow(struct inode* inode, off_t length){
       free_map_allocate(1, &inode->ptrs[idx]);
       disk_write(filesys_disk, inode->ptrs[idx], data_default);
       sectors -= 1;
+      idx += 1;
     }
-    else if(idx<NUM_PTRS_INDIR){
+    else if(idx<+NUM_PTRS_DIR + NUM_PTRS_INDIR){
 
       if(inode->indir_idx==0) free_map_allocate(1, &inode->ptrs[idx]);
       else disk_read(filesys_disk, inode->ptrs[idx], &inner_ptr);
@@ -137,11 +138,12 @@ void inode_grow(struct inode* inode, off_t length){
       inode->indir_idx = indir_idx;
       disk_write(filesys_disk, inode->ptrs[idx], &inner_ptr);
 
-      if(inode->indir_idx == PTR_PER_BLOCK) inode->indir_idx = 0;
-
-
+      if(inode->indir_idx == PTR_PER_BLOCK){
+        inode->indir_idx = 0;
+        idx += 1;
+      } // yunseong
     }
-    if(inode->indir_idx == 0) idx += 1;
+    
   }
   
   inode->ptr_idx = idx;
@@ -294,15 +296,32 @@ inode_close (struct inode *inode)
       /* Deallocate blocks if removed. */
       if (inode->removed) 
         {
+          printf("remove!\n");
           free_map_release (inode->sector, 1);
           size_t sectors = bytes_to_sectors(inode_length(inode));
           /* need to deallocate */
           if(sectors != 0){
             int index = 0;
+            disk_sector_t inner_ptr[PTR_PER_BLOCK];
             for(; index<NUM_PTRS; index++){
               if(sectors == 0) break;
-              free_map_release(inode->ptrs[index], 1);
-              sectors -= 1;
+              else if(index > inode->ptr_idx) break;
+
+              if(index < NUM_PTRS_DIR){
+                free_map_release(inode->ptrs[index], 1);
+                sectors -= 1;
+              }
+              else if(index < NUM_PTRS_DIR + NUM_PTRS_INDIR){
+                disk_read(filesys_disk, inode->ptrs[index], &inner_ptr);
+                for(int i=0; i<PTR_PER_BLOCK; i++){ 
+                  free_map_release(inner_ptr[i], 1);
+                  sectors -= 1;
+                  if(sectors == 0) break;
+                }
+                free_map_release(inode->ptrs[index], 1);
+              }
+              else ASSERT(0);
+              index += 1;
             }
           }
           /* deallocate done */
