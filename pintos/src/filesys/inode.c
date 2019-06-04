@@ -10,8 +10,15 @@
 
 /* Identifies an inode. */
 #define INODE_MAGIC 0x494e4f44
-#define NUM_PTRS 124 // 15-1 in lecture note
+
+#define NUM_PTRS 14
+#define NUM_PTRS_DIR 5
+#define NUM_PTRS_INDIR 9
+#define NUM_PTRS_DOUBLE 0
+
 #define FILE_SIZE_MAX 1<<23
+
+#define PTR_PER_BLOCK 128 // 512/4
 
 /* On-disk inode.
    Must be exactly DISK_SECTOR_SIZE bytes long. */
@@ -23,8 +30,10 @@ struct inode_disk
     unsigned is_allocated;
     disk_sector_t start;                /* First data sector. */
     disk_sector_t ptrs[NUM_PTRS];
+    unsigned ptr_idx;
+    unsigned indir_idx;
 
-    // uint32_t unused[110];               /* Not used. */
+    uint32_t unused[108];               /* Not used. */
   };
 
 /* Returns the number of sectors to allocate for an inode SIZE
@@ -51,6 +60,8 @@ struct inode
     unsigned is_allocated;
     disk_sector_t start;
     disk_sector_t ptrs[NUM_PTRS];
+    unsigned ptr_idx;
+    unsigned indir_idx;
 
   };
 
@@ -83,20 +94,44 @@ inode_init (void)
 
 void inode_grow(struct inode* inode, off_t length){
 
+  disk_sector_t inner_ptr[PTR_PER_BLOCK];
   static char data_default[DISK_SECTOR_SIZE];
 
   size_t sectors = bytes_to_sectors(length) - bytes_to_sectors(inode->length);
 
-  int index=0;
-  for(; index<NUM_PTRS; index++){
-
+  unsigned idx = inode->ptr_idx;
+  for(; idx<NUM_PTRS; idx++){
     if(!(sectors > 0)) break;
-    free_map_allocate(1, &inode->ptrs[index]);
-    disk_write(filesys_disk, inode->ptrs[index], data_default);
-    sectors -= 1;
 
+    if(idx<NUM_PTRS_DIR){
+      free_map_allocate(1, &inode->ptrs[idx]);
+      disk_write(filesys_disk, inode->ptrs[idx], data_default);
+      sectors -= 1;
+    }
+    else if(idx<NUM_PTRS_INDIR){
+
+      if(inode->indir_idx==0) free_map_allocate(1, &inode->ptrs[idx]);
+      else disk_read(filesys_disk, inode->ptrs[idx], &inner_ptr);
+
+      unsigned indir_idx = inode->indir_idx;
+      for(; indir_idx<PTR_PER_BLOCK; indir_idx++){
+        if(!(sectors > 0)) break;
+        free_map_allocate(1, &inner_ptr[indir_idx]);
+        disk_write(filesys_disk, inner_ptr[indir_idx], data_default);
+        indir_idx += 1;
+        sectors -= 1;
+      }
+      inode->indir_idx = indir_idx;
+      disk_write(filesys_disk, inode->ptrs[idx], &inner_ptr);
+
+      if(inode->indir_idx == PTR_PER_BLOCK) inode->indir_idx = 0;
+
+
+    }
+    if(inode->indir_idx == 0) idx += 1;
   }
   
+  inode->ptr_idx = idx;
   inode->is_allocated = 1;
   return;
 }
@@ -129,6 +164,8 @@ inode_create (disk_sector_t sector, off_t length)
       struct inode* inode = malloc(sizeof(struct inode));
       inode->length = 0;
       inode->is_allocated = 0;
+      inode->ptr_idx = 0;
+      inode->indir_idx = 0;
 
       inode_grow(inode, length);
 
@@ -202,6 +239,8 @@ inode_open (disk_sector_t sector)
   inode->length_shown = inode_disk->length;
   inode->start = inode_disk->start;
   inode->is_allocated = inode_disk->is_allocated;
+  inode->indir_idx = inode_disk->indir_idx;
+  inode->ptr_idx = inode_disk->ptr_idx;
   memcpy(&(inode->ptrs), &(inode_disk->ptrs), sizeof(disk_sector_t) * NUM_PTRS );
   free(inode_disk);
   return inode;
@@ -264,6 +303,8 @@ inode_close (struct inode *inode)
         inode_disk->length = inode->length;
         inode_disk->start = inode->start;
         inode_disk->is_allocated = inode->is_allocated;
+        inode_disk->indir_idx = inode->indir_idx;
+        inode_disk->ptr_idx = inode->ptr_idx;
         memcpy(&(inode_disk->ptrs), &(inode->ptrs), sizeof(disk_sector_t) * NUM_PTRS);
         disk_write(filesys_disk, inode->sector, inode_disk);
 
@@ -335,7 +376,13 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
 
   if (inode->deny_write_cnt)
     return 0;
-  int i=0;
+
+  if(size+offset > inode_length(inode)){
+    inode_grow(inode, size+offset);
+    inode->length = size+offset;
+  }
+
+  // int i=0;
   while (size > 0) 
     {
       /* Sector to write, starting byte offset within sector. */
@@ -347,8 +394,8 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
       int sector_left = DISK_SECTOR_SIZE - sector_ofs;
       int min_left = inode_left < sector_left ? inode_left : sector_left;
 
-      printf("%d, size %d: sector: %d-%d=%d, inode: %d-%d=%d, min_left=%d, sector_idx=%d\n",
-              i,size, DISK_SECTOR_SIZE,sector_ofs,sector_left, inode_length (inode),offset,inode_left, min_left, sector_idx);
+      // printf("%d, size %d: sector: %d-%d=%d, inode: %d-%d=%d, min_left=%d, sector_idx=%d\n",
+      //         i,size, DISK_SECTOR_SIZE,sector_ofs,sector_left, inode_length (inode),offset,inode_left, min_left, sector_idx);
 
 
       /* Number of bytes to actually write into this sector. */
