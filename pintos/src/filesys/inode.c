@@ -313,7 +313,8 @@ inode_close (struct inode *inode)
               }
               else if(index < NUM_PTRS_DIR + NUM_PTRS_INDIR){
                 disk_read(filesys_disk, inode->ptrs[index], &inner_ptr);
-                for(int i=0; i<PTR_PER_BLOCK; i++){ 
+                int i=0;
+                for(; i<PTR_PER_BLOCK; i++){ 
                   free_map_release(inner_ptr[i], 1);
                   sectors -= 1;
                   if(sectors == 0) break;
