@@ -11,10 +11,10 @@
 /* Identifies an inode. */
 #define INODE_MAGIC 0x494e4f44
 
-#define NUM_PTRS 114
+#define NUM_PTRS 15
 #define NUM_PTRS_DIR 5
-#define NUM_PTRS_INDIR 109
-#define NUM_PTRS_DOUBLE 0
+#define NUM_PTRS_INDIR 8
+#define NUM_PTRS_DOUBLE 2
 
 #define FILE_SIZE_MAX 1<<23
 
@@ -32,8 +32,9 @@ struct inode_disk
     disk_sector_t ptrs[NUM_PTRS];
     unsigned ptr_idx;
     unsigned indir_idx;
+    unsigned double_indir_idx;
 
-    uint32_t unused[8];               /* Not used. */
+    uint32_t unused[106];               /* Not used. */
   };
 
 /* Returns the number of sectors to allocate for an inode SIZE
@@ -62,6 +63,7 @@ struct inode
     disk_sector_t ptrs[NUM_PTRS];
     unsigned ptr_idx;
     unsigned indir_idx;
+    unsigned double_indir_idx;
 
   };
 
@@ -82,17 +84,31 @@ byte_to_sector (const struct inode *inode, off_t pos)
       return inode->ptrs[pos/DISK_SECTOR_SIZE];
     }
     
+    disk_sector_t inner_ptr[PTR_PER_BLOCK];
     new_pos = pos - DISK_SECTOR_SIZE*NUM_PTRS_DIR;
     if (new_pos < DISK_SECTOR_SIZE*(NUM_PTRS_INDIR * PTR_PER_BLOCK)){
 
-      idx_ptr = NUM_PTRS_DIR + (new_pos / DISK_SECTOR_SIZE / NUM_PTRS_INDIR);
-      new_pos = new_pos % (DISK_SECTOR_SIZE*NUM_PTRS_INDIR);
-      disk_sector_t inner_ptr[PTR_PER_BLOCK];
-
+      idx_ptr = NUM_PTRS_DIR + (new_pos / DISK_SECTOR_SIZE / PTR_PER_BLOCK);
+      new_pos = new_pos % (DISK_SECTOR_SIZE*PTR_PER_BLOCK);
       disk_read(filesys_disk, inode->ptrs[idx_ptr], &inner_ptr);
       return inner_ptr[new_pos/DISK_SECTOR_SIZE];
     }
-    else ASSERT(0);
+    /* here, big files - double indirect blocks */
+    disk_sector_t double_inner_ptr[PTR_PER_BLOCK];
+    new_pos = new_pos - DISK_SECTOR_SIZE*NUM_PTRS_INDIR*PTR_PER_BLOCK;
+
+    idx_ptr = NUM_PTRS_DIR + NUM_PTRS_INDIR + (new_pos / DISK_SECTOR_SIZE / PTR_PER_BLOCK / PTR_PER_BLOCK);
+    printf("idx ptr : %d\n", idx_ptr);
+    disk_read(filesys_disk, inode->ptrs[idx_ptr], &inner_ptr);
+
+    new_pos = new_pos - idx_ptr * DISK_SECTOR_SIZE * PTR_PER_BLOCK * PTR_PER_BLOCK;
+
+    int double_idx_ptr = new_pos / DISK_SECTOR_SIZE / PTR_PER_BLOCK;
+    new_pos = new_pos % (DISK_SECTOR_SIZE*PTR_PER_BLOCK);
+    disk_read(filesys_disk, inner_ptr[double_idx_ptr], &double_inner_ptr);
+    return double_inner_ptr[new_pos/DISK_SECTOR_SIZE];
+    
+    // else ASSERT(0);
   }
     // return inode->start + pos / DISK_SECTOR_SIZE;
   else{
@@ -115,6 +131,7 @@ inode_init (void)
 void inode_grow(struct inode* inode, off_t length){
 
   disk_sector_t inner_ptr[PTR_PER_BLOCK];
+  disk_sector_t double_inner_ptr[PTR_PER_BLOCK];
   static char data_default[DISK_SECTOR_SIZE];
 
   size_t sectors = bytes_to_sectors(length) - bytes_to_sectors(inode->length);
@@ -124,23 +141,24 @@ void inode_grow(struct inode* inode, off_t length){
     if(!(sectors > 0)) break;
 
     if(idx<NUM_PTRS_DIR){
-      free_map_allocate(1, &inode->ptrs[idx]);
+      if(!free_map_allocate(1, &inode->ptrs[idx])) ASSERT(0);
       disk_write(filesys_disk, inode->ptrs[idx], data_default);
       sectors -= 1;
       idx += 1;
     }
-    else if(idx<NUM_PTRS_DIR + NUM_PTRS_INDIR){
 
-      if(inode->indir_idx==0) free_map_allocate(1, &inode->ptrs[idx]);
+    /* indirect level 1 */
+    else if(idx<NUM_PTRS_DIR + NUM_PTRS_INDIR){
+      if(inode->indir_idx==0){
+        if(!free_map_allocate(1, &inode->ptrs[idx])) ASSERT(0); // check whether block is allocated
+      }
       else{
-        // printf("grow, sector : %d\n", inode->ptrs[idx]);
         disk_read(filesys_disk, inode->ptrs[idx], &inner_ptr);
       }
-
       unsigned indir_idx = inode->indir_idx;
       while(indir_idx<PTR_PER_BLOCK){
         if(!(sectors > 0)) break;
-        free_map_allocate(1, &inner_ptr[indir_idx]);
+        if(!free_map_allocate(1, &inner_ptr[indir_idx])) ASSERT(0);
         disk_write(filesys_disk, inner_ptr[indir_idx], data_default);
 
         indir_idx += 1;
@@ -152,12 +170,55 @@ void inode_grow(struct inode* inode, off_t length){
       if(inode->indir_idx == PTR_PER_BLOCK){
         inode->indir_idx = 0;
         idx += 1;
-      } // yunseong
-      else{
-        ASSERT(sectors ==0);
       }
+      else  ASSERT(sectors ==0);
     }
-    
+
+    /* indirect level 2 */
+    else if(idx<NUM_PTRS_DIR + NUM_PTRS_INDIR + NUM_PTRS_DOUBLE){
+      if(inode->indir_idx==0 && inode->double_indir_idx==0){ //initial condition
+        if(!free_map_allocate(1, &inode->ptrs[idx])) ASSERT(0);
+      }
+      else{
+        disk_read(filesys_disk, inode->ptrs[idx], &inner_ptr);
+      }
+      unsigned indir_idx = inode->indir_idx;
+      while(indir_idx<PTR_PER_BLOCK){
+        if(!(sectors > 0)) break;
+        if(inode->double_indir_idx==0){
+          if(!free_map_allocate(1, &inner_ptr[inode->indir_idx])) ASSERT(0);
+        }
+        else{
+          disk_read(filesys_disk, inner_ptr[inode->indir_idx], &double_inner_ptr);
+        }
+        unsigned double_indir_idx = inode->double_indir_idx;
+        while(double_indir_idx<PTR_PER_BLOCK){
+          if(!(sectors > 0)) break;
+          if(!free_map_allocate(1, &double_inner_ptr[double_indir_idx])) ASSERT(0);
+          disk_write(filesys_disk, double_inner_ptr[double_indir_idx], data_default);
+
+          double_indir_idx += 1;
+          sectors -= 1;
+        }
+        inode->double_indir_idx = double_indir_idx;
+        disk_write(filesys_disk, inner_ptr[indir_idx], &double_inner_ptr);
+
+        if(inode->double_indir_idx == PTR_PER_BLOCK){
+          inode->double_indir_idx = 0;
+          indir_idx += 1;
+        }
+        else ASSERT(0);
+      }
+      inode->indir_idx = indir_idx;
+      disk_write(filesys_disk, inode->ptrs[idx], &inner_ptr);
+
+      if(inode->indir_idx == PTR_PER_BLOCK){
+        inode->indir_idx = 0;
+        idx += 1;
+      }
+      else  ASSERT(sectors ==0);
+
+    }
   }
   
   inode->ptr_idx = idx;
@@ -195,6 +256,7 @@ inode_create (disk_sector_t sector, off_t length)
       inode->is_allocated = 0;
       inode->ptr_idx = 0;
       inode->indir_idx = 0;
+      inode->double_indir_idx = 0;
 
       inode_grow(inode, length);
 
@@ -270,6 +332,7 @@ inode_open (disk_sector_t sector)
   inode->start = inode_disk->start;
   inode->is_allocated = inode_disk->is_allocated;
   inode->indir_idx = inode_disk->indir_idx;
+  inode->double_indir_idx = inode_disk->double_indir_idx;
   inode->ptr_idx = inode_disk->ptr_idx;
   memcpy(&(inode->ptrs), &(inode_disk->ptrs), sizeof(disk_sector_t) * NUM_PTRS );
   free(inode_disk);
@@ -318,6 +381,7 @@ inode_close (struct inode *inode)
           if(sectors != 0){
             int index = 0;
             disk_sector_t inner_ptr[PTR_PER_BLOCK];
+            disk_sector_t double_inner_ptr[PTR_PER_BLOCK];
             for(; index<NUM_PTRS; index++){
               if(sectors == 0) break;
               else if(index > inode->ptr_idx) break;
@@ -326,6 +390,7 @@ inode_close (struct inode *inode)
                 free_map_release(inode->ptrs[index], 1);
                 sectors -= 1;
               }
+
               else if(index < NUM_PTRS_DIR + NUM_PTRS_INDIR){
                 disk_read(filesys_disk, inode->ptrs[index], &inner_ptr);
                 int i=0;
@@ -336,6 +401,24 @@ inode_close (struct inode *inode)
                 }
                 free_map_release(inode->ptrs[index], 1);
               }
+
+              else if(index < NUM_PTRS_DIR + NUM_PTRS_INDIR + NUM_PTRS_DOUBLE){
+                disk_read(filesys_disk, inode->ptrs[index], &inner_ptr);
+                int i=0;
+                for(; i<PTR_PER_BLOCK; i++){
+                  disk_read(filesys_disk, inner_ptr[i], &double_inner_ptr);
+                  int j=0;
+                  for(; j<PTR_PER_BLOCK; j++){
+                    free_map_release(double_inner_ptr[j], 1);
+                    sectors -= 1;
+                    if(sectors == 0) break;
+                  }
+                  free_map_release(inner_ptr[i], 1);
+                  if(sectors==0) break;
+                }
+                free_map_release(inode->ptrs[index], 1);
+              }
+
               else ASSERT(0);
               index += 1;
             }
@@ -352,6 +435,7 @@ inode_close (struct inode *inode)
         inode_disk->start = inode->start;
         inode_disk->is_allocated = inode->is_allocated;
         inode_disk->indir_idx = inode->indir_idx;
+        inode_disk->double_indir_idx = inode->double_indir_idx;
         inode_disk->ptr_idx = inode->ptr_idx;
         memcpy(&(inode_disk->ptrs), &(inode->ptrs), sizeof(disk_sector_t) * NUM_PTRS);
         disk_write(filesys_disk, inode->sector, inode_disk);
