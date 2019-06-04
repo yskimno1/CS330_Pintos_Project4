@@ -78,7 +78,7 @@ byte_to_sector (const struct inode *inode, off_t pos)
   ASSERT (inode != NULL);
   if(pos < inode_length(inode)){
     if(pos < DISK_SECTOR_SIZE*NUM_PTRS_DIR){
-      printf("result : %d\n", pos/DISK_SECTOR_SIZE);
+
       return inode->ptrs[pos/DISK_SECTOR_SIZE];
     }
     
@@ -88,7 +88,7 @@ byte_to_sector (const struct inode *inode, off_t pos)
       idx_ptr = NUM_PTRS_DIR + (new_pos / DISK_SECTOR_SIZE / NUM_PTRS_INDIR);
       new_pos = new_pos % (DISK_SECTOR_SIZE*NUM_PTRS_INDIR);
       disk_sector_t inner_ptr[PTR_PER_BLOCK];
-      printf("byte to sector, sector : %d\n", inode->ptrs[idx_ptr]);
+
       disk_read(filesys_disk, inode->ptrs[idx_ptr], &inner_ptr);
       return inner_ptr[new_pos/DISK_SECTOR_SIZE];
     }
@@ -118,7 +118,7 @@ void inode_grow(struct inode* inode, off_t length){
   static char data_default[DISK_SECTOR_SIZE];
 
   size_t sectors = bytes_to_sectors(length) - bytes_to_sectors(inode->length);
-  printf("grow sectors : %d, %d - %d\n", sectors, length, inode->length);
+  // printf("grow sectors : %d, %d - %d\n", sectors, length, inode->length);
   unsigned idx = inode->ptr_idx;
   while(idx<NUM_PTRS){
     if(!(sectors > 0)) break;
@@ -133,7 +133,7 @@ void inode_grow(struct inode* inode, off_t length){
 
       if(inode->indir_idx==0) free_map_allocate(1, &inode->ptrs[idx]);
       else{
-        printf("grow, sector : %d\n", inode->ptrs[idx]);
+        // printf("grow, sector : %d\n", inode->ptrs[idx]);
         disk_read(filesys_disk, inode->ptrs[idx], &inner_ptr);
       }
 
@@ -237,7 +237,7 @@ inode_open (disk_sector_t sector)
   struct list_elem *e;
   struct inode *inode;
 
-  printf("sector : %d\n", sector);
+  // printf("sector : %d\n", sector);
   /* Check whether this inode is already open. */
   for (e = list_begin (&open_inodes); e != list_end (&open_inodes);
        e = list_next (e)) 
@@ -263,7 +263,7 @@ inode_open (disk_sector_t sector)
   inode->removed = false;
 
   struct inode_disk* inode_disk = malloc(sizeof(struct inode_disk));
-  printf("sector : %d %d\n", inode->sector, sector);
+  // printf("sector : %d %d\n", inode->sector, sector);
   disk_read (filesys_disk, inode->sector, inode_disk);
   inode->length = inode_disk->length;
   inode->length_shown = inode_disk->length;
@@ -311,7 +311,7 @@ inode_close (struct inode *inode)
       /* Deallocate blocks if removed. */
       if (inode->removed) 
         {
-          printf("remove!\n");
+          // printf("remove!\n");
           free_map_release (inode->sector, 1);
           size_t sectors = bytes_to_sectors(inode_length(inode));
           /* need to deallocate */
@@ -397,7 +397,7 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
       int chunk_size = size < min_left ? size : min_left;
       if (chunk_size <= 0)
         break;
-      printf("sector idx in read : %d\n", sector_idx);
+      // printf("sector idx in read : %d\n", sector_idx);
       cache_read(sector_idx, buffer, bytes_read, sector_ofs, chunk_size);
     
       /* Advance. */
@@ -426,7 +426,7 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
     return 0;
 
   if(size+offset > inode_length(inode)){
-    printf("need to grow about %d!\n", size+offset);
+    // printf("need to grow about %d!\n", size+offset);
     inode_grow(inode, size+offset);
     inode->length = size+offset;
   }
@@ -435,7 +435,7 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
   while (size > 0) 
     {
       /* Sector to write, starting byte offset within sector. */
-      printf("inode length : %d, offset : %d\n", inode_length(inode), offset);
+      // printf("inode length : %d, offset : %d\n", inode_length(inode), offset);
       disk_sector_t sector_idx = byte_to_sector (inode, offset);
       int sector_ofs = offset % DISK_SECTOR_SIZE;
 
@@ -451,8 +451,8 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
       /* Number of bytes to actually write into this sector. */
       int chunk_size = size < min_left ? size : min_left;
       if (chunk_size <= 0)
-        break;
-      printf("sector idx in write : %d\n", sector_idx);
+      //   break;
+      // printf("sector idx in write : %d\n", sector_idx);
       cache_write(sector_idx, buffer, bytes_written, sector_ofs, chunk_size);
 
       if(inode->length_shown + chunk_size > inode_length(inode))  inode->length_shown = inode_length(inode);
