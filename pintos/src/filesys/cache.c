@@ -48,7 +48,6 @@ struct buffer_cache* evict_cache(disk_sector_t sector_idx){
                 // list_remove(&cache_e->elem); **do not need to remove because we reuse this
                 cache_e->is_using = true;
                 cache_e->sector = sector_idx;
-                printf("no 1. sector : %d\n", cache_e->sector);
                 disk_read(filesys_disk, cache_e->sector, &cache_e->data);
                 cache_e->is_dirty = false;
 
@@ -66,7 +65,6 @@ struct buffer_cache* evict_cache(disk_sector_t sector_idx){
                 cache_e->is_using = true;
                 cache_e->sector = sector_idx;
 
-                printf("no 2. sector : %d\n", cache_e->sector);
                 disk_read(filesys_disk, cache_e->sector, &cache_e->data);
                 cache_e->is_dirty = false;
 
@@ -90,7 +88,6 @@ struct buffer_cache* allocate_new_cache(disk_sector_t sector_idx){
 
     new_cache_e->is_using = true;
 
-    printf("no 3. sector : %d\n", sector_idx);
     disk_read(filesys_disk, sector_idx, new_cache_e->data);
     new_cache_e->is_using = false;
 
