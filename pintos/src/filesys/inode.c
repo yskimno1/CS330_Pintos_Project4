@@ -413,7 +413,7 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
       offset += chunk_size;
       bytes_written += chunk_size;
 
-      i = i+1;
+      // i = i+1;
     }
 
   return bytes_written;
