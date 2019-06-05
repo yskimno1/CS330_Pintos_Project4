@@ -52,7 +52,6 @@ free_map_release (disk_sector_t sector, size_t cnt)
 void
 free_map_open (void) 
 {
-  printf("free map open\n");
   free_map_file = file_open (inode_open (FREE_MAP_SECTOR));
   if (free_map_file == NULL)
     PANIC ("can't open free map");
@@ -76,7 +75,6 @@ free_map_create (void)
   if (!inode_create (FREE_MAP_SECTOR, bitmap_file_size (free_map), false))
     PANIC ("free map creation failed");
 
-  printf("free map create\n");
   /* Write bitmap to file. */
   free_map_file = file_open (inode_open (FREE_MAP_SECTOR));
   if (free_map_file == NULL)
