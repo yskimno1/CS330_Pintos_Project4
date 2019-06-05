@@ -130,6 +130,7 @@ lookup (const struct dir *dir, const char *name,
        ofs += sizeof e) 
     if (e.in_use && !strcmp (name, e.name)) 
       {
+        printf("e in use: %d, strcmp : %d\n", e.in_use, strcmp(name, e.name));
         if (ep != NULL)
           *ep = e;
         if (ofsp != NULL)
@@ -137,7 +138,7 @@ lookup (const struct dir *dir, const char *name,
         return true;
       }
     else{
-      printf("e in use: %d, strcmp : %d\n", e.in_use, strcmp(name, e.name));
+
     }
   return false;
 }
@@ -214,6 +215,7 @@ dir_add (struct dir *dir, const char *name, disk_sector_t inode_sector)
       break;
 
   /* Write slot. */
+  printf("add here\n");
   e.in_use = true;
   strlcpy (e.name, name, sizeof e.name);
   e.inode_sector = inode_sector;
