@@ -77,7 +77,7 @@ dir_open_parent(struct dir* dir){
   struct inode* inode = dir_get_inode(dir);
   disk_sector_t sector_parent = inode_parent(inode);
   struct inode* inode_parent = inode_open(sector_parent);
-  
+
   if(inode_parent == NULL) return NULL;
   else return dir_open(inode_parent);
 }
@@ -157,6 +157,7 @@ dir_lookup (const struct dir *dir, const char *name,
 bool
 dir_add (struct dir *dir, const char *name, disk_sector_t inode_sector) 
 {
+  printf("dir add start\n");
   struct dir_entry e;
   off_t ofs;
   bool success = false;
@@ -179,6 +180,11 @@ dir_add (struct dir *dir, const char *name, disk_sector_t inode_sector)
      inode_read_at() will only return a short read at end of file.
      Otherwise, we'd need to verify that we didn't get a short
      read due to something intermittent such as low memory. */
+  struct inode* inode = inode_open(inode_sector);
+  inode_set_parent(inode, inode_get_inumber(dir_get_inode(dir)));
+  inode_close(inode);
+
+
   for (ofs = 0; inode_read_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
        ofs += sizeof e) 
     if (!e.in_use)
@@ -191,6 +197,7 @@ dir_add (struct dir *dir, const char *name, disk_sector_t inode_sector)
   success = inode_write_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
 
  done:
+  printf("dir add done\n");
   return success;
 }
 

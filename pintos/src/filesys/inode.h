@@ -21,6 +21,6 @@ void inode_allow_write (struct inode *);
 off_t inode_length (const struct inode *);
 disk_sector_t inode_parent(struct inode* inode);
 bool inode_is_dir(struct inode* inode);
-
+void inode_set_parent(struct inode* inode, disk_sector_t sector);
 void inode_grow(struct inode* inode, off_t length);
 #endif /* filesys/inode.h */

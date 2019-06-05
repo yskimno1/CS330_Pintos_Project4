@@ -239,6 +239,7 @@ void inode_grow(struct inode* inode, off_t length){
 bool
 inode_create (disk_sector_t sector, off_t length, bool is_dir)
 {
+  printf("inode create start\n");
   struct inode_disk *disk_inode = NULL;
   bool success = false;
 
@@ -293,7 +294,7 @@ inode_create (disk_sector_t sector, off_t length, bool is_dir)
       //   } 
       free (disk_inode);
     }
-
+  printf("inode create done\n");
   return success;
 }
 
@@ -602,6 +603,11 @@ inode_length (const struct inode *inode)
 disk_sector_t
 inode_parent(struct inode* inode){
   return inode->parent;
+}
+
+void
+inode_set_parent(struct inode* inode, disk_sector_t sector){
+  inode->parent = sector;
 }
 
 bool
