@@ -277,13 +277,14 @@ inode_create (disk_sector_t sector, off_t length, bool is_dir)
       if(is_dir) inode->is_dir = 1;
       else inode->is_dir = 0;
 
-      printf("is dir : %d\n", inode->is_dir);
       inode_grow(inode, length);
 
       memcpy(&(disk_inode->start), &(inode->start), sizeof(disk_sector_t));
       memcpy(&(disk_inode->ptrs), &(inode->ptrs), sizeof(disk_sector_t) * NUM_PTRS);
       free(inode);
       disk_inode -> is_allocated = 1;
+      if(is_dir) disk_inode->is_dir = 1;
+      else disk_inode->is_dir = 0;
       disk_write(filesys_disk, sector, disk_inode);
 
       success = true;
