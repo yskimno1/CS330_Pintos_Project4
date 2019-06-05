@@ -596,40 +596,60 @@ void munmap(int mapid){
 }
 
 bool chdir (const char *dir){
-   struct dir* dir_location = parse_dir(dir);
-   char* filename = parse_file(dir);
-   struct inode *inode = NULL;
-   struct dir* obj_dir = thread_current()->current_dir;
-   if (dir_location==NULL || filename==NULL){
-      dir_close(dir_location);
-      free(filename);
-      return false;
-   }
+  struct dir* dir_location = parse_dir(dir);
+  char* filename = parse_file(dir);
+  struct inode *inode = NULL;
+  struct dir* obj_dir = thread_current()->current_dir;
+	
+	if (dir_location==NULL){
+		free(filename);
+		return false;
+	}
 
-   if (strcmp(filename, "."))
-      obj_dir = dir_location;
-   else if(strcmp(filename, ".."))
-      obj_dir = dir_open_parent(dir_location);    
-   else{
-      dir_lookup (dir, filename, &inode);
-      if (inode==NULL){
-         dir_close(dir_location);
-         free(filename);
-         return false;
-      }
-      if (!inode_is_dir(inode)){
-         dir_close(dir_location);
-         free(filename);
-         return false;
-      }
-      obj_dir = dir_open(inode);
-   }
+	if (strcmp(filename, ".")==0){
+		obj_dir = dir_location;
+		thread_current()->current_dir = obj_dir;
+		return true;
+	}
+	else if(inode_get_inumber(dir_get_inode(dir_location))==ROOT_DIR_SECTOR && strlen(filename)==0){
+		obj_dir = dir_location; // root condition
+		thread_current()->current_dir = obj_dir;
+		return true;
+	}
+	else if(strcmp(filename, "..")==0){
+		obj_dir = dir_open_parent(dir_location);
+		if(obj_dir==NULL){
+			free(filename);
+			return false;
+		}
+	}
+	else{
+		dir_lookup (dir_location, filename, &inode);
+		if (inode==NULL){
+				dir_close(dir_location);
+				free(filename);
+				return false;
+		}
+		if (!inode_is_dir(inode)){
+				dir_close(dir_location);
+				free(filename);
+				return false;
+		}
+		dir_close(dir_location);
 
-   dir_close(thread_current()->current_dir);
-   thread_current()->current_dir = obj_dir;
-   free(filename);
-   return true;
-
+		/* new open - where thread wants to go */
+		struct dir* dir_curr = dir_open(inode);
+		if(dir_curr == NULL){
+			free(filename);
+			return false;
+		}
+		else{
+			obj_dir = dir_curr;
+			thread_current()->current_dir = obj_dir;
+			free(filename);
+			return true;
+		}
+	}
 }
 
 bool mkdir (const char *dir){
