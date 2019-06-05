@@ -535,11 +535,15 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
   if (inode->deny_write_cnt)
     return 0;
 
+  if(inode_is_dir(inode) == false) inode_lock_acquire(inode);
+
   if(size+offset > inode_length(inode)){
     // printf("need to grow about %d!\n", size+offset);
     inode_grow(inode, size+offset);
     inode->length = size+offset;
   }
+
+  if(inode_is_dir(inode) == false) inode_lock_release(inode);
   // printf("before byte to sector : offset %d\n", offset);
   // printf("before byte to sector : length %d\n", inode->length);
   // printf("before byte to sector : ptridx %d\n", inode->ptr_idx);
