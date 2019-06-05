@@ -47,11 +47,12 @@ parse_dir (const char *name){
 
   /* open directory as parsing */
   dir_name = strtok_r(name_copy, "/",&saveptr);
+  if(dir_name==NULL)  printf("dir name : NULL\n");
   printf("dir name : %s\n", dir_name);
+
   if (dir_name != NULL)
     next_dir = strtok_r(NULL, "/",&saveptr);
-
-
+  printf("next dir : %s\n", next_dir);
   while(next_dir != NULL && dir != NULL){
     struct inode* inode;
     if (strcmp(dir_name, ".")==0){
