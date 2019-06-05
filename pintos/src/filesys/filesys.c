@@ -29,7 +29,7 @@ parse_dir (const char *name){
   strlcpy(name_copy, name, strlen(name)+1);
   
   /* open base directory */
-  // printf("namecopy : %s\n", name_copy);
+  printf("namecopy : %s\n", name_copy);
   if (*name_copy=='/'){    // '/' means root directory 
     dir = dir_open_root();
 
