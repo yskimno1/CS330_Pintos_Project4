@@ -93,9 +93,9 @@ parse_file(const char *name){
   }
 
   free(name_copy);
-  char* result = (char* )malloc(strlen(name)+1);
-  strlcpy(result, token, strlen(name)+1);
-  printf("token : %s\n", token);
+  char* result = (char* )malloc(strlen(token)+1);
+  strlcpy(result, token, strlen(token)+1);
+  printf("token : %s %s\n", result, token);
   return result;
 }
 
