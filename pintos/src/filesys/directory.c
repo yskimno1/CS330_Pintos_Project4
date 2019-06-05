@@ -137,7 +137,7 @@ lookup (const struct dir *dir, const char *name,
         return true;
       }
     else{
-      // printf("e in use: %d, strcmp : %d\n", e.in_use, strcmp(name, e.name));
+      printf("e in use: %d, strcmp : %d\n", e.in_use, strcmp(name, e.name));
     }
   return false;
 }
