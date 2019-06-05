@@ -128,10 +128,10 @@ lookup (const struct dir *dir, const char *name,
 
   for (ofs = 0; inode_read_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
        ofs += sizeof e) {
-      printf("-------------\nname : %s, ename : %s\n", name, e.name);
+      // printf("-------------\nname : %s, ename : %s\n", name, e.name);
       if (e.in_use && !strcmp (name, e.name)) 
         {
-          printf("e in use: %d, strcmp : %d\n", e.in_use, strcmp(name, e.name));
+          // printf("e in use: %d, strcmp : %d\n", e.in_use, strcmp(name, e.name));
           if (ep != NULL)
             *ep = e;
           if (ofsp != NULL)
@@ -158,7 +158,7 @@ dir_lookup (const struct dir *dir, const char *name,
 
   ASSERT (dir != NULL);
   ASSERT (name != NULL);
-  printf("lookup file. Name : %s, dir inode sector : %d\n", name, inode_get_inumber(dir_get_inode(dir)));
+  // printf("lookup file. Name : %s, dir inode sector : %d\n", name, inode_get_inumber(dir_get_inode(dir)));
   if (lookup (dir, name, &e, NULL)){
     *inode = inode_open (e.inode_sector);
   }
@@ -207,7 +207,6 @@ dir_add (struct dir *dir, const char *name, disk_sector_t inode_sector)
      Otherwise, we'd need to verify that we didn't get a short
      read due to something intermittent such as low memory. */
   struct inode* inode = inode_open(inode_sector);
-  printf("isdir : %d\n", inode_is_dir(inode));
   inode_set_parent(inode, inode_get_inumber(dir_get_inode(dir)));
   // 
   inode_close(inode);

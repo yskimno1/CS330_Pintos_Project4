@@ -29,7 +29,7 @@ parse_dir (const char *name){
   strlcpy(name_copy, name, strlen(name)+1);
   
   /* open base directory */
-  printf("namecopy : %s\n", name_copy);
+  // printf("namecopy : %s\n", name_copy);
   if (*name_copy=='/'){    // '/' means root directory 
     dir = dir_open_root();
 
@@ -49,7 +49,7 @@ parse_dir (const char *name){
   if (dir_name != NULL)
     next_dir = strtok_r(NULL, "/",&saveptr);
 
-  printf("next dir, dir name : %s, %s\n", next_dir, dir_name);
+  // printf("next dir, dir name : %s, %s\n", next_dir, dir_name);
   while(next_dir != NULL && dir != NULL){
     struct inode* inode;
     if (strcmp(dir_name, ".")==0){
@@ -62,16 +62,16 @@ parse_dir (const char *name){
       if(inode == NULL) return NULL; 
     }
     else{
-      printf("dir_name : %s\n", dir_name);
+      // printf("dir_name : %s\n", dir_name);
       if (dir_lookup(dir, dir_name, &inode) == false){
 
         free(name_copy);
         return NULL;
       }
 
-      printf("inode sector : %d, parent %d, dir : %d\n", inode_get_inumber(inode), inode_parent(inode), inode_is_dir(inode));
+      // printf("inode sector : %d, parent %d, dir : %d\n", inode_get_inumber(inode), inode_parent(inode), inode_is_dir(inode));
       if(inode_is_dir(inode)){
-        printf("inode is directory\n");
+        // printf("inode is directory\n");
         dir_close(dir);
         dir = dir_open(inode);
       }
@@ -152,20 +152,20 @@ filesys_create (const char *name, off_t initial_size, bool is_dir)
   struct dir* dir = parse_dir(name);
   char* filename = parse_file(name);
 
-  printf("dir sector idx : %d, is_dir : %d\n", inode_get_inumber(dir_get_inode(dir)), is_dir);
+
   // printf("parse done\n");
   bool success = (dir != NULL
                   && free_map_allocate (1, &inode_sector)
                   && inode_create (inode_sector, initial_size, is_dir)
                   && dir_add (dir, filename, inode_sector));
-  printf("inode sector : %d\n", inode_sector);
+
   if (!success && inode_sector != 0) 
     free_map_release (inode_sector, 1);
 
   dir_close (dir);
   free(filename);
   // printf("create done\n");
-  printf("filesys_create: success : %d\n", success);
+
   return success;
 }
 

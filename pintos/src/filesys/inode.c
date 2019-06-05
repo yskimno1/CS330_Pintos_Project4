@@ -355,7 +355,7 @@ inode_open (disk_sector_t sector)
   inode->indir_idx = inode_disk->indir_idx;
   inode->double_indir_idx = inode_disk->double_indir_idx;
   inode->ptr_idx = inode_disk->ptr_idx;
-  printf("inode_disk is dir: %d\n", inode_disk->is_dir);
+
   inode->is_dir = inode_disk->is_dir;
   inode->parent = inode_disk->parent;
   memcpy(&(inode->ptrs), &(inode_disk->ptrs), sizeof(disk_sector_t) * NUM_PTRS );
