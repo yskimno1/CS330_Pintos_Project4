@@ -108,6 +108,8 @@ filesys_init (bool format)
   if (format) 
     do_format ();
 
+  printf("filesys init \n");
+
   free_map_open ();
 }
 
@@ -116,6 +118,7 @@ filesys_init (bool format)
 void
 filesys_done (void) 
 {
+  printf("filesys done\n");
   cache_write_behind_loop();
   free_map_close ();
 }
@@ -127,6 +130,7 @@ filesys_done (void)
 bool
 filesys_create (const char *name, off_t initial_size, bool is_dir) 
 {
+  printf("filesys create\n");
   disk_sector_t inode_sector = 0;
   // struct dir *dir = dir_open_root ();
   struct dir* dir = parse_dir(name);
@@ -152,7 +156,7 @@ filesys_create (const char *name, off_t initial_size, bool is_dir)
 struct file *
 filesys_open (const char *name)
 {
-  // printf("filesys open\n");
+  printf("filesys open\n");
   // struct dir *dir = dir_open_root ();
   if(strlen(name)==0) return NULL;
 
