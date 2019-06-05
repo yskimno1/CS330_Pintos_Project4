@@ -46,12 +46,14 @@ parse_dir (const char *name){
   while(next_dir != NULL && dir != NULL){
 
     if (strcmp(dir_name, ".")==0){
+      dir_name = next_dir;
       next_dir = strtok_r(NULL, "/", &saveptr);
       continue;
     }
     else if (strcmp(dir_name, "..")==0){
-      dir = dir_open_parent(dir);
-      if(dir == NULL) return NULL; // yunseong
+      struct inode* inode_parent;
+      inode_parent = dir_get_parent_inode(dir);
+      if(inode_parent == NULL) return NULL;
     }
     else{
       struct inode* inode;
