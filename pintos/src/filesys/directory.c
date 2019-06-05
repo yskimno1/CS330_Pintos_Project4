@@ -134,10 +134,11 @@ lookup (const struct dir *dir, const char *name,
           *ep = e;
         if (ofsp != NULL)
           *ofsp = ofs;
+        printf("true... %d %d\n", e.in_use, strcmp(name, e.name));
         return true;
       }
     else{
-      printf("e in use: %d\n, strcmp : %d\n", e.in_use, strcmp(name, e.name));
+      // printf("e in use: %d, strcmp : %d\n", e.in_use, strcmp(name, e.name));
     }
   return false;
 }
