@@ -157,7 +157,7 @@ dir_lookup (const struct dir *dir, const char *name,
 bool
 dir_add (struct dir *dir, const char *name, disk_sector_t inode_sector) 
 {
-  printf("dir add start\n");
+  // printf("dir add start\n");
   struct dir_entry e;
   off_t ofs;
   bool success = false;
@@ -197,7 +197,7 @@ dir_add (struct dir *dir, const char *name, disk_sector_t inode_sector)
   success = inode_write_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
 
  done:
-  printf("dir add done\n");
+  // printf("dir add done\n");
   return success;
 }
 
