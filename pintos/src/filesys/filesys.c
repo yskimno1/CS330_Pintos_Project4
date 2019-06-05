@@ -44,7 +44,6 @@ parse_dir (const char *name){
     printf("case 3\n");
   }
 
-
   /* open directory as parsing */
   dir_name = strtok_r(name_copy, "/",&saveptr);
   if(dir_name==NULL)  printf("dir name : NULL\n");
@@ -105,7 +104,7 @@ parse_file(const char *name){
   next_token = strtok_r(name_copy, "/",&saveptr);
   while(next_token != NULL){
     token = next_token;
-    next_token = strtok_r(NULL, "/",&saveptr);
+    next_token = strtok_r(NULL, "/", &saveptr);
   }
 
   char* result = (char* )malloc(strlen(token)+1);
