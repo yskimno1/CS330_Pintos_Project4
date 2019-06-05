@@ -73,7 +73,9 @@ parse_dir (const char *name){
         free(name_copy);
         return NULL;
       }
+
       if(inode_is_dir(inode)){
+        printf("inode is directory\n");
         dir_close(dir);
         dir = dir_open(inode);
       }
