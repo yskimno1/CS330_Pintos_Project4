@@ -29,6 +29,7 @@ parse_dir (const char *name){
   strlcpy(name_copy, name, strlen(name)+1);
   
   /* open base directory */
+  printf("namecopy : %s\n", name_copy);
   if (*name_copy=='/')    // '/' means root directory 
     dir = dir_open_root();
   else if (thread_current()->current_dir == NULL) // if NULL, root as default
@@ -153,7 +154,7 @@ filesys_create (const char *name, off_t initial_size, bool is_dir)
                   && dir_add (dir, filename, inode_sector));
   if (!success && inode_sector != 0) 
     free_map_release (inode_sector, 1);
-
+  printf("filesys create done\n");
   free(filename);
   dir_close (dir);
   // printf("create done\n");
