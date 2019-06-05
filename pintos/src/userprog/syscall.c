@@ -44,7 +44,7 @@ static bool fd_validate(int fd);
 static bool string_validate(const char* ptr);
 static bool is_bad_pointer(const char* ptr);
 static bool chdir (const char *dir);
-static bool mkdir (const char *dir);
+static bool mkdir (char *dir);
 static bool readdir (int fd, char *name);
 static bool isdir (int fd);
 static int inumber (int fd);
@@ -238,7 +238,7 @@ syscall_handler (struct intr_frame *f)
 
 		case SYS_MKDIR:      /* Open a file. */
 			argv0 = *p_argv(if_esp+4);
-			f->eax = mkdir((const char *)argv0);
+			f->eax = mkdir((char *)argv0);
 			break;
 
 		case SYS_READDIR:
@@ -652,8 +652,8 @@ bool chdir (const char *dir){
 	}
 }
 
-bool mkdir (const char *dir){
-   return filesys_create(dir,0,true);   
+bool mkdir (char* dir){
+   return filesys_create(dir, 0, true);   
 }
 
 bool readdir (int fd, char *name){
