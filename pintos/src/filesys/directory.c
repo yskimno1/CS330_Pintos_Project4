@@ -214,6 +214,7 @@ dir_add (struct dir *dir, const char *name, disk_sector_t inode_sector)
  done:
   inode_lock_release(dir_get_inode(dir));
   // printf("dir add done\n");
+  printf("dir add, success :%d\n", success);
   return success;
 }
 
