@@ -32,15 +32,15 @@ parse_dir (const char *name){
   printf("namecopy : %s\n", name_copy);
   if (*name_copy=='/'){    // '/' means root directory 
     dir = dir_open_root();
-    printf("case 1\n");
+
   }
   else if (thread_current()->current_dir == NULL){ // if NULL, root as default
-    printf("case 2\n");
+
     dir = dir_open_root();
   }
   else{
     dir = dir_reopen(thread_current()->current_dir);
-    printf("case 3\n");
+
   }
 
   /* open directory as parsing */
@@ -64,15 +64,11 @@ parse_dir (const char *name){
     else{
       printf("dir_name : %s\n", dir_name);
       if (dir_lookup(dir, dir_name, &inode) == false){
-        printf("lookup false\n");
+
         free(name_copy);
         return NULL;
       }
-      else{
-        printf("lookup success, inode info : ??\n");
-        printf("for debugging 1\n");
 
-      }
       printf("inode sector : %d, parent %d\n", inode_get_inumber(inode), inode_parent(inode));
       if(inode_is_dir(inode)){
         printf("inode is directory\n");
