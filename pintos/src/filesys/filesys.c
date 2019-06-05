@@ -21,7 +21,7 @@ static void do_format (void);
    If FORMAT is true, reformats the file system. */
 struct dir* 
 parse_dir (const char *name){
-
+  printf("parse dir start\n");
   char* name_copy = (char*) malloc(strlen(name)+1);
   char* dir_name=NULL;
   char* next_dir=NULL;
