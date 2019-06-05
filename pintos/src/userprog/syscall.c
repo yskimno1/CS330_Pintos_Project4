@@ -307,7 +307,7 @@ int create (const char *file, unsigned initial_size, void* esp){
 
 	check_page(file, initial_size, esp);
 
-	return filesys_create(file, initial_size); 
+	return filesys_create(file, initial_size, false); 
 }
 
 int remove (const char *file){

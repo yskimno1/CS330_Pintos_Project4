@@ -33,6 +33,7 @@ struct inode_disk
     unsigned ptr_idx;
     unsigned indir_idx;
     unsigned double_indir_idx;
+    bool is_dir;
 
     uint32_t unused[106];               /* Not used. */
   };
@@ -64,6 +65,7 @@ struct inode
     unsigned ptr_idx;
     unsigned indir_idx;
     unsigned double_indir_idx;
+    bool is_dir;
 
   };
 
@@ -233,7 +235,7 @@ void inode_grow(struct inode* inode, off_t length){
    Returns true if successful.
    Returns false if memory or disk allocation fails. */
 bool
-inode_create (disk_sector_t sector, off_t length)
+inode_create (disk_sector_t sector, off_t length, bool is_dir)
 {
   struct inode_disk *disk_inode = NULL;
   bool success = false;
@@ -258,6 +260,7 @@ inode_create (disk_sector_t sector, off_t length)
       inode->ptr_idx = 0;
       inode->indir_idx = 0;
       inode->double_indir_idx = 0;
+      inode->is_dir = is_dir;
 
       inode_grow(inode, length);
 
@@ -335,6 +338,7 @@ inode_open (disk_sector_t sector)
   inode->indir_idx = inode_disk->indir_idx;
   inode->double_indir_idx = inode_disk->double_indir_idx;
   inode->ptr_idx = inode_disk->ptr_idx;
+  inode->is_dir = inode_disk->is_dir;
   memcpy(&(inode->ptrs), &(inode_disk->ptrs), sizeof(disk_sector_t) * NUM_PTRS );
   free(inode_disk);
   return inode;
@@ -439,6 +443,7 @@ inode_close (struct inode *inode)
         inode_disk->indir_idx = inode->indir_idx;
         inode_disk->double_indir_idx = inode->double_indir_idx;
         inode_disk->ptr_idx = inode->ptr_idx;
+        inode_disk->is_dir = inode->is_dir;
         memcpy(&(inode_disk->ptrs), &(inode->ptrs), sizeof(disk_sector_t) * NUM_PTRS);
         disk_write(filesys_disk, inode->sector, inode_disk);
 
@@ -516,17 +521,18 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
     inode_grow(inode, size+offset);
     inode->length = size+offset;
   }
-
+  printf("before byte to sector : offset %d\n", offset);
+  printf("before byte to sector : length %d\n", inode->length);
+  printf("before byte to sector : ptridx %d\n", inode->ptr_idx);
+  printf("before byte to sector : indiridx %d\n", inode->indir_idx);
+  printf("before byte to sector : dbindiridx %d\n", inode->double_indir_idx);
+  printf("inode is dir : %d\n", inode->is_dir);
+      
   // int i=0;
   while (size > 0) 
     {
       /* Sector to write, starting byte offset within sector. */
       // printf("inode length : %d, offset : %d\n", inode_length(inode), offset);
-      printf("before byte to sector : offset %d\n", offset);
-      printf("before byte to sector : length %d\n", inode->length);
-      printf("before byte to sector : ptridx %d\n", inode->ptr_idx);
-      printf("before byte to sector : indiridx %d\n", inode->indir_idx);
-      printf("before byte to sector : dbindiridx %d\n", inode->double_indir_idx);
       
       disk_sector_t sector_idx = byte_to_sector (inode, offset);
       int sector_ofs = offset % DISK_SECTOR_SIZE;
