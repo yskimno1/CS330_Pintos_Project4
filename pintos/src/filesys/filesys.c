@@ -144,7 +144,7 @@ filesys_create (const char *name, off_t initial_size, bool is_dir)
 
   free(filename);
   dir_close (dir);
-
+  printf("create done\n");
   return success;
 }
 
