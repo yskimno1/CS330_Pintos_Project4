@@ -63,8 +63,8 @@ parse_dir (const char *name){
       // .. -> get parent directory
       if(strcmp(curr, "..") == 0)
       {
-        if(!get_parent_dir(curr_dir, &inode))
-          return NULL;
+        inode = dir_get_parent_inode(curr_dir);
+        if(inode == NULL) return NULL; 
       }
       else
       {
@@ -72,7 +72,7 @@ parse_dir (const char *name){
           return NULL;
       }
 
-      if(!inode_isdir(inode))
+      if(!inode_is_dir(inode))
         inode_close(inode);
       else
       {
