@@ -21,7 +21,6 @@ static void do_format (void);
    If FORMAT is true, reformats the file system. */
 struct dir* 
 parse_dir (const char *name){
-  printf("parse dir start\n");
   char* name_copy = (char*) malloc(strlen(name)+1);
   char* dir_name=NULL;
   char* next_dir=NULL;
@@ -46,14 +45,12 @@ parse_dir (const char *name){
 
   /* open directory as parsing */
   dir_name = strtok_r(name_copy, "/",&saveptr);
-  if(dir_name==NULL)  printf("dir name : NULL\n");
-  printf("dir name : %s\n", dir_name);
 
+  printf("dir name : %s\n", dir_name);
   if (dir_name != NULL)
     next_dir = strtok_r(NULL, "/",&saveptr);
   printf("next dir : %s\n", next_dir);
   while(next_dir != NULL && dir != NULL){
-    printf("while loop\n");
     struct inode* inode;
     if (strcmp(dir_name, ".")==0){
       dir_name = next_dir;
@@ -61,12 +58,10 @@ parse_dir (const char *name){
       continue;
     }
     else if (strcmp(dir_name, "..")==0){
-
       inode = dir_get_parent_inode(dir);
       if(inode == NULL) return NULL; 
     }
     else{
-      printf("else condition\n");
       if (dir_lookup(dir, dir_name, &inode) == false){
         printf("lookup false\n");
         free(name_copy);
@@ -83,7 +78,6 @@ parse_dir (const char *name){
         inode_close(inode);
       }
     }
-    printf("3333\n");
     next_dir = strtok_r(NULL, "/",&saveptr);
     dir_name = next_dir;
   }
@@ -156,7 +150,7 @@ filesys_create (const char *name, off_t initial_size, bool is_dir)
   // struct dir *dir = dir_open_root ();
   struct dir* dir = parse_dir(name);
   char* filename = parse_file(name);
-  if(dir==NULL) printf("dir null!\n");
+
   printf("filesys_create: filename : %s\n", filename);
   // printf("parse done\n");
   bool success = (dir != NULL
@@ -165,7 +159,7 @@ filesys_create (const char *name, off_t initial_size, bool is_dir)
                   && dir_add (dir, filename, inode_sector));
   if (!success && inode_sector != 0) 
     free_map_release (inode_sector, 1);
-  printf("filesys_create: filesys create done\n");
+
   free(filename);
   dir_close (dir);
   // printf("create done\n");
@@ -212,7 +206,7 @@ filesys_open (const char *name)
     free(filename);
   }
   dir_close(dir);
-  printf("filesys_open: almost done\n");
+
   if(inode == NULL) return NULL;
   else{
     if(inode_is_dir(inode)) return (struct file* )dir_open(inode);
