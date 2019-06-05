@@ -169,7 +169,7 @@ filesys_create (const char *name, off_t initial_size, bool is_dir)
 struct file *
 filesys_open (const char *name)
 {
-  // printf("filesys open\n");
+  printf("filesys open\n");
   // struct dir *dir = dir_open_root ();
   if(strlen(name)==0) return NULL;
 
@@ -200,7 +200,7 @@ filesys_open (const char *name)
     free(filename);
   }
   dir_close(dir);
-
+  printf("filesys open almost done\n");
   if(inode == NULL) return NULL;
   else{
     if(inode_is_dir(inode)) return (struct file* )dir_open(inode);
