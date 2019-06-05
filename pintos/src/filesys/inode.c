@@ -35,7 +35,7 @@ struct inode_disk
     unsigned double_indir_idx;
     unsigned is_dir;
 
-    uint32_t unused[106];               /* Not used. */
+    uint32_t unused[105];               /* Not used. */
   };
 
 /* Returns the number of sectors to allocate for an inode SIZE
