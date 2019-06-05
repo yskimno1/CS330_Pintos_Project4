@@ -62,6 +62,7 @@ parse_dir (const char *name){
       if(inode == NULL) return NULL; 
     }
     else{
+      printf("dir_name : %s\n", dir_name);
       if (dir_lookup(dir, dir_name, &inode) == false){
         printf("lookup false\n");
         free(name_copy);
@@ -70,8 +71,9 @@ parse_dir (const char *name){
       else{
         printf("lookup success, inode info : ??\n");
         printf("for debugging 1\n");
-        
+
       }
+      printf("inode sector : %d, parent %d\n", inode_get_inumber(inode), inode_parent(inode));
       if(inode_is_dir(inode)){
         printf("inode is directory\n");
         dir_close(dir);
