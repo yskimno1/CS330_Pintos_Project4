@@ -628,6 +628,7 @@ inode_parent(struct inode* inode){
 void
 inode_set_parent(struct inode* inode, disk_sector_t sector){
   inode->parent = sector;
+  inode_set_is_dir(inode, true);
 }
 
 bool
