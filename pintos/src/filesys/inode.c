@@ -306,7 +306,6 @@ inode_create (disk_sector_t sector, off_t length, bool is_dir)
       free (disk_inode);
     }
   // printf("inode create done\n");
-  printf("inode create, success : %d\n", success);
   return success;
 }
 
@@ -340,7 +339,6 @@ inode_open (disk_sector_t sector)
   /* Initialize. */
   list_push_front (&open_inodes, &inode->elem);
   inode->sector = sector;
-  printf("allocated sector : %d\n", sector);
   inode->open_cnt = 1;
   inode->deny_write_cnt = 0;
   inode->removed = false;

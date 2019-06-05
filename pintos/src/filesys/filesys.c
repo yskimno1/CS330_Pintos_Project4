@@ -80,7 +80,6 @@ parse_dir (const char *name){
         dir = dir_open(inode);
       }
       else{
-        printf("else\n");
         inode_close(inode);
       }
     }
@@ -182,7 +181,6 @@ filesys_create (const char *name, off_t initial_size, bool is_dir)
 struct file *
 filesys_open (const char *name)
 {
-  printf("filesys_open\n");
   // struct dir *dir = dir_open_root ();
   if(strlen(name)==0) return NULL;
 

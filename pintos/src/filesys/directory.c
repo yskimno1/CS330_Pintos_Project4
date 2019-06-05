@@ -128,7 +128,7 @@ lookup (const struct dir *dir, const char *name,
 
   for (ofs = 0; inode_read_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
        ofs += sizeof e) {
-      printf("name : %s, ename : %s\n", name, e.name);
+      printf("-------------\nname : %s, ename : %s\n", name, e.name);
       if (e.in_use && !strcmp (name, e.name)) 
         {
           printf("e in use: %d, strcmp : %d\n", e.in_use, strcmp(name, e.name));
@@ -160,7 +160,6 @@ dir_lookup (const struct dir *dir, const char *name,
   ASSERT (name != NULL);
   printf("lookup file. Name : %s, dir inode sector : %d\n", name, inode_get_inumber(dir_get_inode(dir)));
   if (lookup (dir, name, &e, NULL)){
-    printf("dir lookup found\n");
     *inode = inode_open (e.inode_sector);
   }
   else
@@ -220,7 +219,7 @@ dir_add (struct dir *dir, const char *name, disk_sector_t inode_sector)
   e.in_use = true;
   strlcpy (e.name, name, sizeof e.name);
   e.inode_sector = inode_sector;
-  printf("e inode sector : %d, name: %s\n", inode_sector, name);
+
   success = inode_write_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
 
  done:
