@@ -144,6 +144,7 @@ filesys_create (const char *name, off_t initial_size, bool is_dir)
   // struct dir *dir = dir_open_root ();
   struct dir* dir = parse_dir(name);
   char* filename = parse_file(name);
+  if(dir==NULL) printf("dir null!\n");
   printf("dir: %s, filename : %s\n", dir, filename);
   // printf("parse done\n");
   bool success = (dir != NULL
