@@ -53,7 +53,7 @@ parse_dir (const char *name){
     else if (strcmp(dir_name, "..")==0){
       struct inode* inode_parent;
       inode_parent = dir_get_parent_inode(dir);
-      if(inode_parent == NULL) return NULL;
+      if(inode_parent == NULL) return NULL; 
     }
     else{
       struct inode* inode;
@@ -172,23 +172,32 @@ filesys_open (const char *name)
   if(strlen(name)==0) return NULL;
 
   struct dir* dir = parse_dir(name);
-
+  bool passed = false;
   struct inode *inode = NULL;
-
+  if(dir==NULL) passed = false;
   if(dir != NULL){
     char* filename = parse_file(name);
     if(strcmp(filename, ".")==0){
       free(filename);
       return (struct file* )dir;
     }
-    else if(strcmp(filename, "..")==0){
+    else if(inode_get_inumber(dir_get_inode(dir))==ROOT_DIR_SECTOR && strlen(filename)==0){
       free(filename);
       return (struct file* )dir;
     }
-
+    else if(strcmp(filename, "..")==0){
+      struct inode* inode_parent;
+      inode_parent = dir_get_parent_inode(dir);
+      if(inode_parent == NULL){
+        free(filename);
+        return NULL; 
+      }
+      else passed=true;
+    }
     dir_lookup(dir, filename, &inode);
     free(filename);
   }
+  dir_close(dir);
 
   if(inode == NULL) return NULL;
   else{
