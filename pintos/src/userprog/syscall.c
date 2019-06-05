@@ -15,6 +15,7 @@
 #include "filesys/off_t.h"
 #include "vm/page.h"
 #include "vm/frame.h"
+#include "filesys/inode.h"
 // struct file 
 //   {
 //     struct inode *inode;        /* File's inode. */
@@ -42,6 +43,11 @@ void munmap(int mapid);
 static bool fd_validate(int fd);
 static bool string_validate(const char* ptr);
 static bool is_bad_pointer(const char* ptr);
+static bool chdir (const char *dir);
+static bool mkdir (const char *dir);
+static bool readdir (int fd, char *name);
+static bool isdir (int fd);
+static int inumber (int fd);
 
 struct file_entry{
 	int fd;
