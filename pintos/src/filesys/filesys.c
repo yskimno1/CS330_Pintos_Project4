@@ -67,7 +67,7 @@ parse_dir (const char *name){
       if(inode == NULL) return NULL; 
     }
     else{
-
+      printf("else condition\n");
       if (dir_lookup(dir, dir_name, &inode) == false){
         printf("lookup false\n");
         free(name_copy);
@@ -80,10 +80,11 @@ parse_dir (const char *name){
         dir = dir_open(inode);
       }
       else{
+        printf("else\n");
         inode_close(inode);
       }
     }
-
+    printf("3333\n");
     next_dir = strtok_r(NULL, "/",&saveptr);
     dir_name = next_dir;
   }
