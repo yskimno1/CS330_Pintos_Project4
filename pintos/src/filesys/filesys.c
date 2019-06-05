@@ -157,7 +157,7 @@ filesys_create (const char *name, off_t initial_size, bool is_dir)
   struct dir* dir = parse_dir(name);
   char* filename = parse_file(name);
 
-  printf("filesys_create: filename : %s, dir : %d\n", filename, is_dir);
+  printf("filesys_create: dir %p, filename : %s, dir : %d\n", dir, filename, is_dir);
   // printf("parse done\n");
   bool success = (dir != NULL
                   && free_map_allocate (1, &inode_sector)
