@@ -127,18 +127,20 @@ lookup (const struct dir *dir, const char *name,
   ASSERT (name != NULL);
 
   for (ofs = 0; inode_read_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
-       ofs += sizeof e) 
-    if (e.in_use && !strcmp (name, e.name)) 
-      {
-        printf("e in use: %d, strcmp : %d\n", e.in_use, strcmp(name, e.name));
-        if (ep != NULL)
-          *ep = e;
-        if (ofsp != NULL)
-          *ofsp = ofs;
-        return true;
-      }
-    else{
+       ofs += sizeof e) {
+      printf("name : %s, ename : %s\n", name, e.name);
+      if (e.in_use && !strcmp (name, e.name)) 
+        {
+          printf("e in use: %d, strcmp : %d\n", e.in_use, strcmp(name, e.name));
+          if (ep != NULL)
+            *ep = e;
+          if (ofsp != NULL)
+            *ofsp = ofs;
+          return true;
+        }
+      else{
 
+      }
     }
   return false;
 }
@@ -158,7 +160,7 @@ dir_lookup (const struct dir *dir, const char *name,
   ASSERT (name != NULL);
   printf("lookup file. Name : %s, dir inode sector : %d\n", name, inode_get_inumber(dir_get_inode(dir)));
   if (lookup (dir, name, &e, NULL)){
-    printf("lookup found\n");
+    printf("dir lookup found\n");
     *inode = inode_open (e.inode_sector);
   }
   else
