@@ -33,7 +33,7 @@ struct inode_disk
     unsigned ptr_idx;
     unsigned indir_idx;
     unsigned double_indir_idx;
-    bool is_dir;
+    unsigned is_dir;
 
     uint32_t unused[106];               /* Not used. */
   };
@@ -65,7 +65,7 @@ struct inode
     unsigned ptr_idx;
     unsigned indir_idx;
     unsigned double_indir_idx;
-    bool is_dir;
+    unsigned is_dir;
 
   };
 
@@ -260,7 +260,8 @@ inode_create (disk_sector_t sector, off_t length, bool is_dir)
       inode->ptr_idx = 0;
       inode->indir_idx = 0;
       inode->double_indir_idx = 0;
-      inode->is_dir = is_dir;
+      if(is_dir) inode->is_dir = 1;
+      else inode->is_dir = 0;
 
       inode_grow(inode, length);
 
