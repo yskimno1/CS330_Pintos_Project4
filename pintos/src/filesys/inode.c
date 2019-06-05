@@ -7,6 +7,7 @@
 #include "filesys/free-map.h"
 #include "threads/malloc.h"
 #include "filesys/cache.h"
+#include "threads/synch.h"
 
 /* Identifies an inode. */
 #define INODE_MAGIC 0x494e4f44
@@ -68,8 +69,18 @@ struct inode
     unsigned double_indir_idx;
     unsigned is_dir;
     disk_sector_t parent;
-
+    struct lock lock;
   };
+
+void
+inode_lock_acquire(struct inode* inode){
+  lock_acquire(&inode->lock);
+}
+
+void
+inode_lock_release(struct inode* inode){
+  lock_release(&inode->lock);
+}
 
 /* Returns the disk sector that contains byte offset POS within
    INODE.
@@ -345,6 +356,8 @@ inode_open (disk_sector_t sector)
   inode->is_dir = inode_disk->is_dir;
   inode->parent = inode_disk->parent;
   memcpy(&(inode->ptrs), &(inode_disk->ptrs), sizeof(disk_sector_t) * NUM_PTRS );
+  lock_init(&inode->lock);
+
   free(inode_disk);
   return inode;
 }

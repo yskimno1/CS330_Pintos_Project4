@@ -23,4 +23,7 @@ disk_sector_t inode_parent(struct inode* inode);
 bool inode_is_dir(struct inode* inode);
 void inode_set_parent(struct inode* inode, disk_sector_t sector);
 void inode_grow(struct inode* inode, off_t length);
+
+void inode_lock_acquire(struct inode* inode);
+void inode_lock_release(struct inode* inode);
 #endif /* filesys/inode.h */
