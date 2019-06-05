@@ -47,6 +47,7 @@ parse_dir (const char *name){
 
   /* open directory as parsing */
   dir_name = strtok_r(name_copy, "/",&saveptr);
+  printf("dir name : %s\n", dir_name);
   if (dir_name != NULL)
     next_dir = strtok_r(NULL, "/",&saveptr);
 
@@ -151,7 +152,7 @@ filesys_create (const char *name, off_t initial_size, bool is_dir)
   struct dir* dir = parse_dir(name);
   char* filename = parse_file(name);
   if(dir==NULL) printf("dir null!\n");
-  printf("filename : %s\n", filename);
+  printf("filesys_create: filename : %s\n", filename);
   // printf("parse done\n");
   bool success = (dir != NULL
                   && free_map_allocate (1, &inode_sector)
@@ -159,11 +160,11 @@ filesys_create (const char *name, off_t initial_size, bool is_dir)
                   && dir_add (dir, filename, inode_sector));
   if (!success && inode_sector != 0) 
     free_map_release (inode_sector, 1);
-  printf("filesys create done\n");
+  printf("filesys_create: filesys create done\n");
   free(filename);
   dir_close (dir);
   // printf("create done\n");
-  printf("success : %d\n", success);
+  printf("filesys_create: success : %d\n", success);
   return success;
 }
 
@@ -175,7 +176,7 @@ filesys_create (const char *name, off_t initial_size, bool is_dir)
 struct file *
 filesys_open (const char *name)
 {
-  printf("filesys open\n");
+  printf("filesys_open\n");
   // struct dir *dir = dir_open_root ();
   if(strlen(name)==0) return NULL;
 
@@ -206,7 +207,7 @@ filesys_open (const char *name)
     free(filename);
   }
   dir_close(dir);
-  printf("filesys open almost done\n");
+  printf("filesys_open: almost done\n");
   if(inode == NULL) return NULL;
   else{
     if(inode_is_dir(inode)) return (struct file* )dir_open(inode);
