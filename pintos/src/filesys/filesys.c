@@ -51,7 +51,7 @@ parse_dir (const char *name){
 
 
   while(next_dir != NULL && dir != NULL){
-    printf("next dir, dir name : %s, %s\n", next_dir, dir_name);
+    printf("next dir, dir name at start: %s, %s\n", next_dir, dir_name);
     struct inode* inode;
     if (strcmp(dir_name, ".")==0){
       dir_name = next_dir;
@@ -72,7 +72,7 @@ parse_dir (const char *name){
 
       printf("inode sector : %d, parent %d, dir : %d\n", inode_get_inumber(inode), inode_parent(inode), inode_is_dir(inode));
       if(inode_is_dir(inode)){
-        // printf("inode is directory\n");
+        printf("inode is directory\n");
         dir_close(dir);
         dir = dir_open(inode);
       }
@@ -82,6 +82,7 @@ parse_dir (const char *name){
     }
     next_dir = strtok_r(NULL, "/",&saveptr);
     dir_name = next_dir;
+    printf("next dir, dir name at bottom: %s, %s\n", next_dir, dir_name);
   }
   free(name_copy);
   return dir;
