@@ -208,7 +208,7 @@ dir_add (struct dir *dir, const char *name, disk_sector_t inode_sector)
      read due to something intermittent such as low memory. */
   struct inode* inode = inode_open(inode_sector);
   inode_set_parent(inode, inode_get_inumber(dir_get_inode(dir)));
-  inode_set_is_dir(inode, true);
+  // inode_set_is_dir(inode, true);
   inode_close(inode);
 
   for (ofs = 0; inode_read_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
