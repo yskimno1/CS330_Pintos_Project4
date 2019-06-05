@@ -22,7 +22,8 @@ static void do_format (void);
 struct dir* 
 parse_dir (const char *name){
   char* name_copy = (char*) malloc(strlen(name)+1);
-  char* dir_name=NULL, next_dir=NULL;
+  char* dir_name=NULL;
+  char* next_dir=NULL;
   char* saveptr;
   struct dir* dir;
   strlcpy(name_copy, name, strlen(name)+1);
@@ -81,7 +82,8 @@ parse_file(const char *name){
   printf("start of parsefile, name : %s\n", name);
   char* name_copy = (char*) malloc(strlen(name)+1);
   char* filename;
-  char* token, next_token;
+  char* token;
+  char* next_token;
   char* saveptr;
   strlcpy(name_copy, name, strlen(name)+1);
   next_token = strtok_r(name_copy, "/",&saveptr);
