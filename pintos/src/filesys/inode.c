@@ -102,7 +102,7 @@ byte_to_sector (const struct inode *inode, off_t pos)
     new_pos = new_pos - DISK_SECTOR_SIZE*NUM_PTRS_INDIR*PTR_PER_BLOCK;
 
     idx_ptr = NUM_PTRS_DIR + NUM_PTRS_INDIR + (new_pos / DISK_SECTOR_SIZE / PTR_PER_BLOCK / PTR_PER_BLOCK);
-    printf("idx ptr : %d\n", idx_ptr);
+    // printf("idx ptr : %d\n", idx_ptr);
     disk_read(filesys_disk, inode->ptrs[idx_ptr], &inner_ptr);
 
     new_pos = new_pos - idx_ptr * DISK_SECTOR_SIZE * PTR_PER_BLOCK * PTR_PER_BLOCK;
@@ -133,7 +133,7 @@ inode_init (void)
 }
 
 void inode_grow(struct inode* inode, off_t length){
-  printf("inode grow start\n");
+  // printf("inode grow start\n");
 
   disk_sector_t inner_ptr[PTR_PER_BLOCK];
   disk_sector_t double_inner_ptr[PTR_PER_BLOCK];
@@ -239,7 +239,7 @@ void inode_grow(struct inode* inode, off_t length){
 bool
 inode_create (disk_sector_t sector, off_t length, bool is_dir)
 {
-  printf("inode create start\n");
+  // printf("inode create start\n");
   struct inode_disk *disk_inode = NULL;
   bool success = false;
 
@@ -294,7 +294,7 @@ inode_create (disk_sector_t sector, off_t length, bool is_dir)
       //   } 
       free (disk_inode);
     }
-  printf("inode create done\n");
+  // printf("inode create done\n");
   return success;
 }
 
@@ -527,12 +527,12 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
     inode_grow(inode, size+offset);
     inode->length = size+offset;
   }
-  printf("before byte to sector : offset %d\n", offset);
-  printf("before byte to sector : length %d\n", inode->length);
-  printf("before byte to sector : ptridx %d\n", inode->ptr_idx);
-  printf("before byte to sector : indiridx %d\n", inode->indir_idx);
-  printf("before byte to sector : dbindiridx %d\n", inode->double_indir_idx);
-  printf("inode is dir : %d\n", inode->is_dir);
+  // printf("before byte to sector : offset %d\n", offset);
+  // printf("before byte to sector : length %d\n", inode->length);
+  // printf("before byte to sector : ptridx %d\n", inode->ptr_idx);
+  // printf("before byte to sector : indiridx %d\n", inode->indir_idx);
+  // printf("before byte to sector : dbindiridx %d\n", inode->double_indir_idx);
+  // printf("inode is dir : %d\n", inode->is_dir);
       
   // int i=0;
   while (size > 0) 
