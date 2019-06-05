@@ -134,7 +134,6 @@ lookup (const struct dir *dir, const char *name,
           *ep = e;
         if (ofsp != NULL)
           *ofsp = ofs;
-        printf("true... %d %d\n", e.in_use, strcmp(name, e.name));
         return true;
       }
     else{
@@ -186,7 +185,7 @@ dir_add (struct dir *dir, const char *name, disk_sector_t inode_sector)
   /* Check NAME for validity. */
   if (*name == '\0' || strlen (name) > NAME_MAX){
     inode_lock_release(dir_get_inode(dir));
-    printf("111\n");
+
     return false;
   }
 
@@ -216,7 +215,6 @@ dir_add (struct dir *dir, const char *name, disk_sector_t inode_sector)
   strlcpy (e.name, name, sizeof e.name);
   e.inode_sector = inode_sector;
   success = inode_write_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
-  printf("success true? %d\n", success);
 
  done:
   inode_lock_release(dir_get_inode(dir));

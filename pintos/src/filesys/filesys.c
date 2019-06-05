@@ -75,7 +75,7 @@ parse_dir (const char *name){
     dir_name = next_dir;
   }
   free(name_copy);
-
+  printf("parse dir done, dir sector: %d, parent sector %d\n", inode_get_inumber(dir_get_inode(dir)), inode_get_inumber(dir_get_parent_inode(dir)));
   return dir;
 }
 
