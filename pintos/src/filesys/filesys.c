@@ -21,62 +21,129 @@ static void do_format (void);
    If FORMAT is true, reformats the file system. */
 struct dir* 
 parse_dir (const char *name){
-  char* name_copy = (char*) malloc(strlen(name)+1);
-  char* dir_name=NULL;
-  char* next_dir=NULL;
-  char* saveptr;
-  struct dir* dir;
-  strlcpy(name_copy, name, strlen(name)+1);
-  
-  /* open base directory */
-  printf("namecopy : %s\n", name_copy);
-  if (*name_copy=='/')    // '/' means root directory 
-    dir = dir_open_root();
-  else if (thread_current()->current_dir == NULL) // if NULL, root as default
-    dir = dir_open_root();
+  char path_copy[strlen(name)+1];
+  strlcpy(path_copy, name, strlen(name)+1);
+
+  char *curr, *next, *save_ptr;
+  struct dir *curr_dir;
+
+  // if absolute path or curr_dir is not set yet (then curr_dir should be root)
+  if(path_copy[0] == '/' || thread_current()->current_dir == NULL)
+  {
+    curr_dir = dir_open_root();
+  }
+
+  // otherwise open the current directory
   else
-    dir = dir_reopen(thread_current()->current_dir);
+  {
+    curr_dir = dir_reopen(thread_current()->current_dir);
+  }
 
+  next = NULL;
+  curr = strtok_r(path_copy, "/", &save_ptr);
 
-  /* open directory as parsing */
-  dir_name = strtok_r(name_copy, "/",&saveptr);
-  if (dir_name != NULL)
-    next_dir = strtok_r(NULL, "/",&saveptr);
+  if(curr)
+  {
+    next = strtok_r(NULL, "/", &save_ptr);
+  }
 
-
-  while(next_dir != NULL && dir != NULL){
-
-    if (strcmp(dir_name, ".")==0){
-      dir_name = next_dir;
-      next_dir = strtok_r(NULL, "/", &saveptr);
+  /* loop until there is no more token afterwards */
+  while(next != NULL)
+  {
+    // . will not change the directory, so skip.
+    if(strcmp(curr, ".") == 0)
+    {
+      curr = next;
+      next = strtok_r(NULL, "/", &save_ptr);
       continue;
     }
-    else if (strcmp(dir_name, "..")==0){
-      struct inode* inode_parent;
-      inode_parent = dir_get_parent_inode(dir);
-      if(inode_parent == NULL) return NULL; 
-    }
-    else{
-      struct inode* inode;
-      if (dir_lookup(dir, dir_name, &inode) == false){
-        free(name_copy);
-        return NULL;
+    else
+    {
+      struct inode *inode;
+      // .. -> get parent directory
+      if(strcmp(curr, "..") == 0)
+      {
+        if(!get_parent_dir(curr_dir, &inode))
+          return NULL;
       }
-      if(inode_is_dir(inode)){
-        dir_close(dir);
-        dir = dir_open(inode);
+      else
+      {
+        if(!dir_lookup(curr_dir, curr, &inode))
+          return NULL;
       }
-      else{
-        inode_close(inode);
-      }
-    }
 
-    next_dir = strtok_r(NULL, "/",&saveptr);
-    dir_name = next_dir;
+      if(!inode_isdir(inode))
+        inode_close(inode);
+      else
+      {
+        dir_close(curr_dir);
+        curr_dir = dir_open(inode); // move on to the next directory in path name
+      }
+    }
+    curr = next;
+    next = strtok_r(NULL, "/", &save_ptr);
   }
-  free(name_copy);
-  printf("parse dir done, dir sector: %d, parent sector %d\n", inode_get_inumber(dir_get_inode(dir)), inode_get_inumber(dir_get_parent_inode(dir)));
-  return dir;
+
+  return curr_dir;
+
+
+
+  // char* name_copy = (char*) malloc(strlen(name)+1);
+  // char* dir_name=NULL;
+  // char* next_dir=NULL;
+  // char* saveptr;
+  // struct dir* dir;
+  // strlcpy(name_copy, name, strlen(name)+1);
+  
+  // /* open base directory */
+  // printf("namecopy : %s\n", name_copy);
+  // if (*name_copy=='/')    // '/' means root directory 
+  //   dir = dir_open_root();
+  // else if (thread_current()->current_dir == NULL) // if NULL, root as default
+  //   dir = dir_open_root();
+  // else
+  //   dir = dir_reopen(thread_current()->current_dir);
+
+
+  // /* open directory as parsing */
+  // dir_name = strtok_r(name_copy, "/",&saveptr);
+  // if (dir_name != NULL)
+  //   next_dir = strtok_r(NULL, "/",&saveptr);
+
+
+  // while(next_dir != NULL && dir != NULL){
+
+  //   if (strcmp(dir_name, ".")==0){
+  //     dir_name = next_dir;
+  //     next_dir = strtok_r(NULL, "/", &saveptr);
+  //     continue;
+  //   }
+  //   else if (strcmp(dir_name, "..")==0){
+  //     struct inode* inode_parent;
+  //     inode_parent = dir_get_parent_inode(dir);
+  //     if(inode_parent == NULL) return NULL; 
+  //   }
+  //   else{
+  //     struct inode* inode;
+  //     if (dir_lookup(dir, dir_name, &inode) == false){
+  //       free(name_copy);
+  //       return NULL;
+  //     }
+  //     if(inode_is_dir(inode)){
+  //       dir_close(dir);
+  //       dir = dir_open(inode);
+  //     }
+  //     else{
+  //       inode_close(inode);
+  //     }
+  //   }
+
+  //   next_dir = strtok_r(NULL, "/",&saveptr);
+  //   dir_name = next_dir;
+  // }
+  // free(name_copy);
+  // printf("parse dir done, dir sector: %d, parent sector %d\n", inode_get_inumber(dir_get_inode(dir)), inode_get_inumber(dir_get_parent_inode(dir)));
+  // return dir;
 }
 
 
