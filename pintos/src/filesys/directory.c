@@ -136,6 +136,9 @@ lookup (const struct dir *dir, const char *name,
           *ofsp = ofs;
         return true;
       }
+    else{
+      printf("e in use: %d\n, strcmp : %d\n", e.in_use, strcmp(name, e.name));
+    }
   return false;
 }
 
@@ -188,7 +191,6 @@ dir_add (struct dir *dir, const char *name, disk_sector_t inode_sector)
 
   /* Check that NAME is not in use. */
   if (lookup (dir, name, NULL, NULL)){
-    printf("222\n");
     goto done;
   }
 
