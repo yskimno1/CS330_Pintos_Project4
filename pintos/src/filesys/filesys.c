@@ -167,8 +167,8 @@ filesys_create (const char *name, off_t initial_size, bool is_dir)
   if (!success && inode_sector != 0) 
     free_map_release (inode_sector, 1);
 
-  free(filename);
   dir_close (dir);
+  free(filename);
   // printf("create done\n");
   printf("filesys_create: success : %d\n", success);
   return success;
