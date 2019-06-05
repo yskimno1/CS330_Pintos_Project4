@@ -340,6 +340,7 @@ inode_open (disk_sector_t sector)
   /* Initialize. */
   list_push_front (&open_inodes, &inode->elem);
   inode->sector = sector;
+  printf("allocated sector : %d\n", sector);
   inode->open_cnt = 1;
   inode->deny_write_cnt = 0;
   inode->removed = false;
