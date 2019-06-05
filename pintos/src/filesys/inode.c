@@ -277,6 +277,7 @@ inode_create (disk_sector_t sector, off_t length, bool is_dir)
       if(is_dir) inode->is_dir = 1;
       else inode->is_dir = 0;
 
+      printf("is dir : %d\n", inode->is_dir);
       inode_grow(inode, length);
 
       memcpy(&(disk_inode->start), &(inode->start), sizeof(disk_sector_t));
@@ -634,4 +635,10 @@ inode_is_dir(struct inode* inode){
   if(inode->is_dir == 1) return true;
   else if(inode->is_dir == 0) return false;
   else ASSERT(0);
+}
+
+void
+inode_set_is_dir(struct inode* inode, bool is_dir){
+  if(is_dir) inode->is_dir = 1;
+  else inode->is_dir = 0;
 }
