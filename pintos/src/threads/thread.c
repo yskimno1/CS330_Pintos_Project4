@@ -194,6 +194,12 @@ thread_create (const char *name, int priority,
 
   list_push_back(&thread_current()->list_children, &t->elem_list_children); //yunseong
   
+  /* filesys */
+  t->current_dir = NULL;
+  if(thread_current()->current_dir != NULL){
+    t->current_dir = dir_reopen(thread_current()->current_dir);
+  }
+  
   /* Stack frame for kernel_thread(). */
   kf = alloc_frame (t, sizeof *kf);
   kf->eip = NULL;

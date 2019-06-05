@@ -34,8 +34,9 @@ struct inode_disk
     unsigned indir_idx;
     unsigned double_indir_idx;
     unsigned is_dir;
+    disk_sector_t parent;
 
-    uint32_t unused[105];               /* Not used. */
+    uint32_t unused[104];               /* Not used. */
   };
 
 /* Returns the number of sectors to allocate for an inode SIZE
@@ -66,6 +67,7 @@ struct inode
     unsigned indir_idx;
     unsigned double_indir_idx;
     unsigned is_dir;
+    disk_sector_t parent;
 
   };
 
@@ -340,6 +342,7 @@ inode_open (disk_sector_t sector)
   inode->double_indir_idx = inode_disk->double_indir_idx;
   inode->ptr_idx = inode_disk->ptr_idx;
   inode->is_dir = inode_disk->is_dir;
+  inode->parent = inode_disk->parent;
   memcpy(&(inode->ptrs), &(inode_disk->ptrs), sizeof(disk_sector_t) * NUM_PTRS );
   free(inode_disk);
   return inode;
@@ -445,6 +448,7 @@ inode_close (struct inode *inode)
         inode_disk->double_indir_idx = inode->double_indir_idx;
         inode_disk->ptr_idx = inode->ptr_idx;
         inode_disk->is_dir = inode->is_dir;
+        inode_disk->parent = inode->parent;
         memcpy(&(inode_disk->ptrs), &(inode->ptrs), sizeof(disk_sector_t) * NUM_PTRS);
         disk_write(filesys_disk, inode->sector, inode_disk);
 
@@ -593,4 +597,16 @@ off_t
 inode_length (const struct inode *inode)
 {
   return inode->length;
+}
+
+disk_sector_t
+inode_parent(struct inode* inode){
+  return inode->parent;
+}
+
+bool
+inode_is_dir(struct inode* inode){
+  if(inode->is_dir == 1) return true;
+  else if(inode_is_dir == 0) return false;
+  else ASSERT(0);
 }

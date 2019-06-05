@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include "threads/synch.h"
 #include "vm/page.h"
-
+#include "filesys/directory.h"
 /* States in a thread's life cycle. */
 enum thread_status
   {
@@ -119,6 +119,7 @@ struct thread
     int map_id;
 
     struct list list_file;              /* not used variable, but just for the case */
+    struct dir* current_dir;
   };
 
 /* If false (default), use round-robin scheduler.

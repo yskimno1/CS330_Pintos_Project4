@@ -226,6 +226,8 @@ syscall_handler (struct intr_frame *f)
 			munmap((int)argv0);
 			break;
   	default:
+		  printf("other syscall came!\n");
+			ASSERT(0);
   		break;
   	}
 }

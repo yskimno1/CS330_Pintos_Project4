@@ -69,6 +69,20 @@ dir_reopen (struct dir *dir)
   return dir_open (inode_reopen (dir->inode));
 }
 
+struct dir* 
+dir_open_parent(struct dir* dir){
+  //find parent inode
+  //check if dir and open
+  //itself if root
+  struct inode* inode = dir_get_inode(dir);
+  disk_sector_t sector_parent = inode_parent(inode);
+  struct inode* inode_parent = inode_open(sector_parent);
+  
+  if(inode_parent == NULL) return NULL;
+  else return dir_open(inode_parent);
+}
+
+
 /* Destroys DIR and frees associated resources. */
 void
 dir_close (struct dir *dir) 
