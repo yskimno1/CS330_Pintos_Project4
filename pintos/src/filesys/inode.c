@@ -613,6 +613,6 @@ inode_set_parent(struct inode* inode, disk_sector_t sector){
 bool
 inode_is_dir(struct inode* inode){
   if(inode->is_dir == 1) return true;
-  else if(inode_is_dir == 0) return false;
+  else if(inode->is_dir == 0) return false;
   else ASSERT(0);
 }
