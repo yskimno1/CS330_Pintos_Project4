@@ -176,6 +176,8 @@ process_exit (void)
       }
     }
 	}
+  
+  if(thread_current()->current_dir != NULL) dir_close(thread_current()->current_dir);
 
   sema_up(&curr->sema_wait);
   /* wait until parent removes the child in the list */
