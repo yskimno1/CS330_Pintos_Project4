@@ -129,6 +129,7 @@ inode_init (void)
 }
 
 void inode_grow(struct inode* inode, off_t length){
+  printf("inode grow start\n");
 
   disk_sector_t inner_ptr[PTR_PER_BLOCK];
   disk_sector_t double_inner_ptr[PTR_PER_BLOCK];
@@ -514,11 +515,6 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
     // printf("need to grow about %d!\n", size+offset);
     inode_grow(inode, size+offset);
     inode->length = size+offset;
-    printf("before byte to sector : offset %d\n", offset);
-    printf("before byte to sector : length %d\n", inode->length);
-    printf("before byte to sector : ptridx %d\n", inode->ptr_idx);
-    printf("before byte to sector : indiridx %d\n", inode->indir_idx);
-    printf("before byte to sector : dbindiridx %d\n", inode->double_indir_idx);
   }
 
   // int i=0;
@@ -526,6 +522,12 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
     {
       /* Sector to write, starting byte offset within sector. */
       // printf("inode length : %d, offset : %d\n", inode_length(inode), offset);
+      printf("before byte to sector : offset %d\n", offset);
+      printf("before byte to sector : length %d\n", inode->length);
+      printf("before byte to sector : ptridx %d\n", inode->ptr_idx);
+      printf("before byte to sector : indiridx %d\n", inode->indir_idx);
+      printf("before byte to sector : dbindiridx %d\n", inode->double_indir_idx);
+      
       disk_sector_t sector_idx = byte_to_sector (inode, offset);
       int sector_ofs = offset % DISK_SECTOR_SIZE;
 
