@@ -35,13 +35,15 @@ parse_dir (const char *name){
   else
     dir = dir_reopen(thread_current()->current_dir);
 
+  printf("1 of parsedir, name : %s\n", name);
   /* open directory as parsing */
   dir_name = strtok_r(name_copy, "/",&saveptr);
   if (dir_name != NULL)
     next_dir = strtok_r(NULL, "/",&saveptr);
 
-
+  printf("2 of parsedir\n");
   while(next_dir != NULL && dir != NULL){
+    printf("while loop\n");
     if (strcmp(dir_name, ".")==0){
       next_dir = strtok_r(NULL, "/", &saveptr);
       continue;
@@ -69,12 +71,14 @@ parse_dir (const char *name){
     dir_name = next_dir;
   }
   free(name_copy);
+  printf("parsedir done\n");
   return dir;
 }
 
 
 char* 
 parse_file(const char *name){
+  printf("start of parsefile, name : %s\n", name);
   char* name_copy = (char*) malloc(strlen(name)+1);
   char* filename;
   char* token, next_token;
@@ -135,10 +139,11 @@ filesys_create (const char *name, off_t initial_size, bool is_dir)
   // struct dir *dir = dir_open_root ();
   struct dir* dir = parse_dir(name);
   char* filename = parse_file(name);
+  printf("parse done\n");
   bool success = (dir != NULL
                   && free_map_allocate (1, &inode_sector)
                   && inode_create (inode_sector, initial_size, is_dir)
-                  && dir_add (dir, name, inode_sector));
+                  && dir_add (dir, filename, inode_sector));
   if (!success && inode_sector != 0) 
     free_map_release (inode_sector, 1);
 
