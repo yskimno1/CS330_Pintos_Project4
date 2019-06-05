@@ -122,10 +122,11 @@ lookup (const struct dir *dir, const char *name,
 {
   struct dir_entry e;
   size_t ofs;
-  
+
   ASSERT (dir != NULL);
   ASSERT (name != NULL);
-
+  printf("dir sector idx : %d\n", inode_get_inumber(dir_get_inode(dir)));
+  
   for (ofs = 0; inode_read_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
        ofs += sizeof e) {
       printf("-------------\nname : %s, ename : %s\n", name, e.name);
