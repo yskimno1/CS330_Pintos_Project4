@@ -215,16 +215,15 @@ dir_add (struct dir *dir, const char *name, disk_sector_t inode_sector)
       break;
 
   /* Write slot. */
-  printf("add here\n");
   e.in_use = true;
   strlcpy (e.name, name, sizeof e.name);
   e.inode_sector = inode_sector;
+  printf("e inode sector : %d, name: %s\n", inode_sector, name);
   success = inode_write_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
 
  done:
   inode_lock_release(dir_get_inode(dir));
-  // printf("dir add done\n");
-  printf("dir add, success :%d\n", success);
+
   return success;
 }
 
