@@ -155,8 +155,11 @@ dir_lookup (const struct dir *dir, const char *name,
 
   ASSERT (dir != NULL);
   ASSERT (name != NULL);
-  if (lookup (dir, name, &e, NULL))
+  printf("lookup file. Name : %s, dir inode sector : %d\n", name, inode_get_inumber(dir_get_inode(dir)));
+  if (lookup (dir, name, &e, NULL)){
+    printf("lookup true\n");
     *inode = inode_open (e.inode_sector);
+  }
   else
     *inode = NULL;
 
