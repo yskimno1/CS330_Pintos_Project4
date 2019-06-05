@@ -225,6 +225,31 @@ syscall_handler (struct intr_frame *f)
 
 			munmap((int)argv0);
 			break;
+		case SYS_CHDIR:      /* Open a file. */
+			argv0 = *p_argv(if_esp+4);
+			f->eax = chdir((const char *)argv0);
+			break;
+
+		case SYS_MKDIR:      /* Open a file. */
+			argv0 = *p_argv(if_esp+4);
+			f->eax = mkdir((const char *)argv0);
+			break;
+
+		case SYS_READDIR:
+			argv0 = *p_argv(if_esp+4);
+			argv1 = *p_argv(if_esp+8);
+			f->eax = readdir((int)argv0, (char *)argv1);
+			break;
+
+		case SYS_ISDIR:      /* Open a file. */
+			argv0 = *p_argv(if_esp+4);
+			f->eax = isdir((int)argv0);
+			break;
+
+		case SYS_INUMBER:      /* Open a file. */
+			argv0 = *p_argv(if_esp+4);
+			f->eax = inumber((int)argv0);
+			break;
   	default:
 		  printf("other syscall came!\n");
 			ASSERT(0);
@@ -563,6 +588,91 @@ void munmap(int mapid){
 	lock_release(&lock_frame);
 	return;
 }
+
+bool chdir (const char *dir){
+   struct dir* dir_location = parse_dir(dir);
+   char* filename = parse_file(dir);
+   struct inode *inode = NULL;
+   struct dir* obj_dir = thread_current()->current_dir;
+   if (dir_location==NULL || filename==NULL){
+      dir_close(dir_location);
+      free(filename);
+      return false;
+   }
+
+   if (strcmp(filename, "."))
+      obj_dir = dir_location;
+   else if(strcmp(filename, ".."))
+      obj_dir = dir_open_parent(dir_location);    
+   else{
+      dir_lookup (dir, filename, &inode);
+      if (inode==NULL){
+         dir_close(dir_location);
+         free(filename);
+         return false;
+      }
+      if (!inode_is_dir(inode)){
+         dir_close(dir_location);
+         free(filename);
+         return false;
+      }
+      obj_dir = dir_open(inode);
+   }
+
+   dir_close(thread_current()->current_dir);
+   thread_current()->current_dir = obj_dir;
+   free(filename);
+   return true;
+
+}
+
+bool mkdir (const char *dir){
+   return filesys_create(dir,0,true);   
+}
+
+bool readdir (int fd, char *name){
+   if (!fd_validate(fd))
+      return false;
+   struct file* file;
+   struct inode* inode;
+   struct dir* dir;
+   file = thread_current()->fdt[fd];
+   if (file==NULL) return false;
+
+   inode = file_get_inode(file);
+   if (inode==NULL) return false;
+   if (!inode_is_dir(inode)) return false;
+
+   dir = (struct dir*)file;
+   return dir_readdir(dir, name);
+}
+
+bool isdir (int fd){
+   if (!fd_validate(fd))
+      return false;
+
+   struct file* file = thread_current()->fdt[fd];
+   if (file==NULL) return false;
+
+   struct inode* inode = file_get_inode(file);
+   if (inode==NULL) return false;
+
+   return inode_is_dir(inode);
+}
+
+int inumber (int fd){
+   if (!fd_validate(fd))
+      return false;
+
+   struct file* file = thread_current()->fdt[fd];
+   if (file==NULL) return false;
+
+   const struct inode* inode = file_get_inode(file);
+   if (inode==NULL) return false;
+
+   return inode_get_inumber(inode);
+}
+
 
 bool
 fd_validate(int fd){
