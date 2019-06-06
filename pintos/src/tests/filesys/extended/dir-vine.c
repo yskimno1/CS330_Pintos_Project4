@@ -34,21 +34,21 @@ test_main (void)
       snprintf (file_name, sizeof file_name, "file%d", i);
       if (!create (file_name, 0))
         break;
-      msg("1st,,,");
+      printf("1st,,,");
       CHECK ((fd = open (file_name)) > 1, "open \"%s\"", file_name);
       snprintf (contents, sizeof contents, "contents %d\n", i);
-      ASSERT(0);
+
       if (write (fd, contents, strlen (contents)) != (int) strlen (contents)) 
         {
-          msg("555...\n");
+          printf("555...\n");
           CHECK (remove (file_name), "remove \"%s\"", file_name);
-          msg("3rd....\n");
+          printf("3rd....\n");
           close (fd);
           break;
         }
-      msg ("c000..");
+      printf ("c000..");
       close (fd);
-      msg ("c111..");
+      printf ("c111..");
       /* Create directory. */
       snprintf (dir_name, sizeof dir_name, "dir%d", i);
       if (!mkdir (dir_name)) 
