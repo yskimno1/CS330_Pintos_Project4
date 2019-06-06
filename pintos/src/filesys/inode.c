@@ -13,8 +13,8 @@
 #define INODE_MAGIC 0x494e4f44
 
 #define NUM_PTRS 15
-#define NUM_PTRS_DIR 5
-#define NUM_PTRS_INDIR 8
+#define NUM_PTRS_DIR 0
+#define NUM_PTRS_INDIR 13
 #define NUM_PTRS_DOUBLE 2
 
 #define FILE_SIZE_MAX 1<<23
