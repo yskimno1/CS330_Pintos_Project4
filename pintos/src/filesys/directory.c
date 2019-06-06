@@ -267,12 +267,14 @@ dir_remove (struct dir *dir, const char *name)
       {
         if (e_isdir.in_use)
           {
+
             goto done;
           }
         pos_isdir += sizeof(e_isdir);
       }
-    /* 2. check opened condition */
+    /* 2. check opened-by-other-file condition */
     if(inode_is_opened(inode)){
+      // printf("opened. cannot remove\n");
       goto done;
     }
   }
