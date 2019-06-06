@@ -178,10 +178,9 @@ process_exit (void)
     }
 	}
 
-  file_close(thread_current()->main_file);
 
   /* close all files */
-  
+  file_close(thread_current()->main_file);
   int i;
   for(i=0; i<FILE_MAX; i++){
     if(inode_is_dir(file_get_inode(curr->fdt[i]))) dir_close((struct dir*)(curr->fdt[i]));
