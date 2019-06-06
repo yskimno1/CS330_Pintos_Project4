@@ -357,13 +357,14 @@ int open (const char *file){
   if (!string_validate(file) || strlen(file)>14) return -1;
 	
 	// filelock_acquire();
+
 	struct file* f = filesys_open(file);
 	if (f == NULL) {
 		// filelock_release();
 		return -1;
 	}
 	struct file_entry* fe = malloc(sizeof(struct file_entry));
-	
+
 //   filelock_release();
   struct thread *t = thread_current();
   int fd = (t->fd_vld)++;
