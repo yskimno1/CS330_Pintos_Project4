@@ -522,6 +522,10 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
 
   return bytes_read;
 }
+bool
+inode_is_opened(struct inode* inode){
+  return (inode->open_cnt>0);
+}
 
 /* Writes SIZE bytes from BUFFER into INODE, starting at OFFSET.
    Returns the number of bytes actually written, which may be

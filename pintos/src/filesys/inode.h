@@ -19,6 +19,7 @@ off_t inode_write_at (struct inode *, const void *, off_t size, off_t offset);
 void inode_deny_write (struct inode *);
 void inode_allow_write (struct inode *);
 off_t inode_length (const struct inode *);
+bool inode_is_opened(struct inode* inode);
 disk_sector_t inode_parent(struct inode* inode);
 bool inode_is_dir(struct inode* inode);
 void inode_set_parent(struct inode* inode, disk_sector_t sector);
