@@ -186,7 +186,6 @@ void inode_grow(struct inode* inode, off_t length){
         inode->indir_idx = 0;
         idx += 1;
       }
-      else printf("wrong\n");
     }
 
     /* indirect level 2 */
