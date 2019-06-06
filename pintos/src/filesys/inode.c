@@ -107,7 +107,7 @@ byte_to_sector (const struct inode *inode, off_t pos)
       return inner_ptr[new_pos/DISK_SECTOR_SIZE];
     }
     /* here, big files - double indirect blocks */
-    printf("come big\n");
+    ASSERT(0);
     disk_sector_t double_inner_ptr[PTR_PER_BLOCK];
     new_pos = new_pos - DISK_SECTOR_SIZE*NUM_PTRS_INDIR*PTR_PER_BLOCK;
 
