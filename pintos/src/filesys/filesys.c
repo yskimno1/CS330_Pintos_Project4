@@ -203,11 +203,12 @@ filesys_open (const char *name)
   struct inode *inode = NULL;
   if(dir==NULL) passed = false;
   if(dir != NULL){
+    printf("before parse file done, name : %s\n", name);
     char* filename = parse_file(name);
-    printf("parse file done, name : %s\n", filename);
     printf("----\n");
-    printf("inumber : %d\n", inode_get_inumber(dir_get_inode(dir)));
-    printf("---]\n");
+    printf("inumber : %d\n", inode_get_inumber(dir_get_inode(dir))==ROOT_DIR_SECTOR);
+    printf("filename length : %d\n", strlen(filename));
+    printf("----\n");
     if(strcmp(filename, ".")==0){
       free(filename);
       return (struct file* )dir;
