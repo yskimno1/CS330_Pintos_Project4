@@ -183,9 +183,9 @@ page_fault (struct intr_frame *f)
       }
    //   printf(" fault : %p\n, esp %p, esp-32 : %p", fault_addr, f->esp, f->esp - SIZE);
       else if(fault_addr >= f->esp - SIZE){
-
+         lock_acquire(&lock_frame);
          success = grow_stack(fault_addr, PAGE_FAULT);
-
+         lock_release(&lock_frame);
          // printf("%d\n", success);
          if(success) return;
          else{

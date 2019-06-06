@@ -105,6 +105,14 @@ dir_close (struct dir *dir)
     }
 }
 
+void
+dir_close_by_inode(struct inode* inode){
+  if(inode != NULL){
+    inode_close(inode);
+    
+  }
+}
+
 /* Returns the inode encapsulated by DIR. */
 struct inode *
 dir_get_inode (struct dir *dir) 

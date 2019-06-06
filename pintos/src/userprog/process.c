@@ -182,7 +182,7 @@ process_exit (void)
   /* wait until parent removes the child in the list */
   sema_down(&curr->sema_exited);
 
-
+  lock_acquire(&lock_frame);
   if(!list_empty(&thread_current()->list_mmap)){
 		for(e=list_begin(&thread_current()->list_mmap); e!=list_end(&thread_current()->list_mmap); e=list_next(e)){
 			struct page_mmap* mmap_e = list_entry(e,struct page_mmap, elem_mmap);
@@ -190,7 +190,7 @@ process_exit (void)
       list_remove(e);
     }
 	}
-
+  lock_release(&lock_frame);
   /* free all sup table */
   while(!list_empty(&curr->sup_page_table)){ 
     struct list_elem* e = list_pop_front(&curr->sup_page_table);
@@ -205,7 +205,7 @@ process_exit (void)
     if(inode_is_dir(file_get_inode(curr->fdt[i]))) dir_close((struct dir*)(curr->fdt[i]));
     else  file_close(curr->fdt[i]);
   }
-  
+
   if(thread_current()->current_dir != NULL) dir_close(thread_current()->current_dir);
 
   /* Destroy the current process's page directory and switch back
@@ -535,15 +535,16 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       /* Get a page of memory. */
 
 
-
+      lock_acquire(&lock_frame);
       struct sup_page_table_entry* spt_e = allocate_page(upage, false, LOAD_SEGMENT, page_read_bytes, page_zero_bytes, file, ofs, writable);
       if(spt_e == NULL) ASSERT(0);
 
       bool success = page_insert(spt_e);
       if(success == false){
+          lock_release(&lock_frame);
           return false;
       }
-
+      lock_release(&lock_frame);
 
       /* Advance. */
       read_bytes -= page_read_bytes;
@@ -562,9 +563,9 @@ setup_stack (void **esp, int argc, void** argv)
   uint8_t *kpage;
   bool success = false;
 
-
+  lock_acquire(&lock_frame);
   success = grow_stack(((uint8_t* )PHYS_BASE) - PGSIZE, GROW_STACK);
-
+  lock_release(&lock_frame);
   if(success){
     *esp = PHYS_BASE;
     /* Implementation start */
