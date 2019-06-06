@@ -308,7 +308,7 @@ inode_create (disk_sector_t sector, off_t length, bool is_dir)
       free (disk_inode);
     }
   // printf("inode create done\n");
-  printf("inode create : %d\n", success);
+
   return success;
 }
 
