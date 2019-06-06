@@ -154,19 +154,20 @@ bool
 dir_lookup (const struct dir *dir, const char *name,
             struct inode **inode) 
 {
-  inode_lock_acquire(dir_get_inode(dir));
+
   struct dir_entry e;
 
   ASSERT (dir != NULL);
   ASSERT (name != NULL);
-  // printf("lookup file. Name : %s, dir inode sector : %d\n", name, inode_get_inumber(dir_get_inode(dir)));
+  
+  inode_lock_acquire(dir_get_inode(dir));
   if (lookup (dir, name, &e, NULL)){
     *inode = inode_open (e.inode_sector);
   }
   else
     *inode = NULL;
-
   inode_lock_release(dir_get_inode(dir));
+
   return *inode != NULL;
 }
 
@@ -180,7 +181,7 @@ bool
 dir_add (struct dir *dir, const char *name, disk_sector_t inode_sector) 
 {
   // printf("dir add start\n");
-  inode_lock_acquire(dir_get_inode(dir));
+
   struct dir_entry e;
   off_t ofs;
   bool success = false;
@@ -189,6 +190,7 @@ dir_add (struct dir *dir, const char *name, disk_sector_t inode_sector)
   ASSERT (name != NULL);
 
   /* Check NAME for validity. */
+  inode_lock_acquire(dir_get_inode(dir));
   if (*name == '\0' || strlen (name) > NAME_MAX){
     inode_lock_release(dir_get_inode(dir));
 
@@ -209,7 +211,6 @@ dir_add (struct dir *dir, const char *name, disk_sector_t inode_sector)
      read due to something intermittent such as low memory. */
   struct inode* inode = inode_open(inode_sector);
   inode_set_parent(inode, inode_get_inumber(dir_get_inode(dir)));
-  // 
   inode_close(inode);
 
   for (ofs = 0; inode_read_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
@@ -235,7 +236,7 @@ dir_add (struct dir *dir, const char *name, disk_sector_t inode_sector)
 bool
 dir_remove (struct dir *dir, const char *name) 
 {
-  inode_lock_acquire(dir_get_inode(dir));
+
   struct dir_entry e;
   struct inode *inode = NULL;
   bool success = false;
@@ -245,6 +246,7 @@ dir_remove (struct dir *dir, const char *name)
   ASSERT (name != NULL);
 
   /* Find directory entry. */
+  inode_lock_acquire(dir_get_inode(dir));
   if (!lookup (dir, name, &e, &ofs))
     goto done;
 
@@ -267,14 +269,12 @@ dir_remove (struct dir *dir, const char *name)
       {
         if (e_isdir.in_use)
           {
-            printf("not good\n");
             goto done;
           }
         pos_isdir += sizeof(e_isdir);
       }
     /* 2. check opened-by-other-file condition */
     if(inode_is_opened(inode)){
-      printf("opened. cannot remove\n");
       goto done;
     }
   }
