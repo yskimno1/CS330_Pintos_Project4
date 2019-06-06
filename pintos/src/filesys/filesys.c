@@ -160,7 +160,6 @@ filesys_create (const char *name, off_t initial_size, bool is_dir)
   struct dir* dir = parse_dir(name);
   char* filename = parse_file(name);
 
-  printf("dir : %p\n, filename %s\n", dir, filename);
   if (dir==NULL || !strcmp(name, "")){
     dir_close (dir);
     free(filename);
