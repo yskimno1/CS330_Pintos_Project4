@@ -86,7 +86,7 @@ void
 syscall_init (void) 
 {
   intr_register_int (0x30, 3, INTR_ON, syscall_handler, "syscall");
-  filelock_init();
+//   filelock_init();
 }
 
 static void
@@ -128,9 +128,9 @@ syscall_handler (struct intr_frame *f)
   		argv0 = *p_argv(if_esp+4);
       argv1 = *p_argv(if_esp+8);
 
-			filelock_acquire();
+			// filelock_acquire();
 			int result = create((const char*)argv0, (unsigned)argv1, if_esp);
-			filelock_release();
+			// filelock_release();
 			if(result == -1){
 				exit(-1);
 				break;
@@ -142,9 +142,9 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_REMOVE:	/* Delete a file. */
   		argv0 = *p_argv(if_esp+4);
-			filelock_acquire();
+			// filelock_acquire();
 			result = remove((const char* )argv0);
-			filelock_release();
+			// filelock_release();
 			if(result == -1){
 				exit(-1);
 				break;
@@ -162,9 +162,9 @@ syscall_handler (struct intr_frame *f)
 
   	case SYS_FILESIZE:/* Obtain a file's size. */
   		argv0 = *p_argv(if_esp+4);
-			filelock_acquire();
+			// filelock_acquire();
 			result = filesize((int)argv0);
-			filelock_release();
+			// filelock_release();
 			if(result == -1){
 				exit(-1);
 				break;
@@ -291,7 +291,7 @@ check_page(void* buffer, unsigned size, void* esp){
 				bool success = grow_stack(ptr, PAGE_FAULT);
 				lock_release(&lock_frame);
 				if(success == false){
-					filelock_release();
+					// filelock_release();
 					exit(-1);
 				}
 			}
@@ -330,7 +330,7 @@ int wait (pid_t pid){
 int create (const char *file, unsigned initial_size, void* esp){
 
   if (strcmp(file, "") && !string_validate(file)){
-	filelock_release();
+	// filelock_release();
     exit(-1);
   }
 
@@ -353,15 +353,15 @@ int remove (const char *file){
 int open (const char *file){
   if (!string_validate(file) || strlen(file)>14) return -1;
 	
-	filelock_acquire();
+	// filelock_acquire();
 	struct file* f = filesys_open(file);
 	if (f == NULL) {
-		filelock_release();
+		// filelock_release();
 		return -1;
 	}
 	struct file_entry* fe = malloc(sizeof(struct file_entry));
 	
-  filelock_release();
+//   filelock_release();
   struct thread *t = thread_current();
   int fd = (t->fd_vld)++;
   t->fdt[fd] = f;
@@ -380,15 +380,15 @@ int filesize (int fd){
 }
 
 int read (int fd, void *buffer, unsigned size, void* esp){
-	filelock_acquire();
+	// filelock_acquire();
 	int cnt=-1; unsigned i;
 	char* buffer_pointer = buffer;
 	if (!fd_validate(fd)){
-		filelock_release();
+		// filelock_release();
 		return -1;
 	}
   if (!string_validate(buffer)){
-		filelock_release();
+		// filelock_release();
 		exit(-1);
     return -1;
 	}
@@ -399,7 +399,7 @@ int read (int fd, void *buffer, unsigned size, void* esp){
 			buffer_pointer[i] = input_getc();
 		}
 		cnt=size;
-		filelock_release();
+		// filelock_release();
 		return size;
 	}
 
@@ -411,7 +411,7 @@ int read (int fd, void *buffer, unsigned size, void* esp){
 			cnt = file_read(t->fdt[fd], buffer, size);
 		}
 	}
-	filelock_release();
+	// filelock_release();
 	return cnt;
 }
 
@@ -438,9 +438,9 @@ int write (int fd, const void *buffer, unsigned size, void* esp){
 
 	struct thread* t = thread_current();
 	struct file* f = t->fdt[fd];
-	filelock_acquire();
+	// filelock_acquire();
 	cnt = file_write(f, buffer, size);	
-	filelock_release();
+	// filelock_release();
 	return cnt;
 }
 
@@ -461,36 +461,36 @@ void close (int fd){
 		exit(-1);
 		return;
 	}
-	filelock_acquire();
+	// filelock_acquire();
 	struct thread* t = thread_current();
 	struct file* f = t->fdt[fd];
 	t->fdt[fd] = NULL;
 	file_close(f);
-	filelock_release();
+	// filelock_release();
 }
 
 int mmap(int fd, void* addr){ //needs lazy loading
-	filelock_acquire();
+	// filelock_acquire();
 	struct thread* curr = thread_current();
 	struct file* f = curr->fdt[fd];
 	if(f == NULL){
-		filelock_release();
+		// filelock_release();
 		return -1;
 	}
 	if(pg_ofs(addr)!=0 || addr==0){
-		filelock_release();
+		// filelock_release();
 		return -1;
 	}
 
 	struct file* f_reopen = file_reopen(f);
 	if(f_reopen == NULL){
-		filelock_release();
+		// filelock_release();
 		return -1;
 	}
 
 	uint32_t read_bytes = file_length(f_reopen);
 	if(read_bytes == 0){
-		filelock_release();
+		// filelock_release();
 		return -1;
 	}
 	uint32_t zero_bytes = 0;
@@ -507,7 +507,7 @@ int mmap(int fd, void* addr){ //needs lazy loading
 			spt_e = allocate_page(addr, false, CREATE_MMAP, page_read_bytes, page_zero_bytes, f_reopen, offset, true);
 			if(spt_e == NULL){
 				lock_release(&lock_frame);
-				filelock_release();
+				// filelock_release();
 				return -1;
 			}
 
@@ -515,7 +515,7 @@ int mmap(int fd, void* addr){ //needs lazy loading
 			if(mmap_e == NULL){
 				free(spt_e);
 				lock_release(&lock_frame);
-				filelock_release();
+				// filelock_release();
 				return -1;
 			}
 
@@ -527,7 +527,7 @@ int mmap(int fd, void* addr){ //needs lazy loading
 			if(success == false){
 				list_remove(&mmap_e->elem_mmap);
 				lock_release(&lock_frame);
-				filelock_release();
+				// filelock_release();
 				return -1;
 			}
 		}
@@ -536,7 +536,7 @@ int mmap(int fd, void* addr){ //needs lazy loading
 			if(mmap_e == NULL){
 				free(spt_e);
 				lock_release(&lock_frame);
-				filelock_release();
+				// filelock_release();
 				return -1;
 			}
 
@@ -548,7 +548,7 @@ int mmap(int fd, void* addr){ //needs lazy loading
 			if(success == false){
 				list_remove(&mmap_e->elem_mmap);
 				lock_release(&lock_frame);
-				filelock_release();
+				// filelock_release();
 				return -1;
 			}
 		}
@@ -562,7 +562,7 @@ int mmap(int fd, void* addr){ //needs lazy loading
 
 	int return_value = thread_current()->map_id;
 	thread_current()->map_id += 1;
-	filelock_release();
+	// filelock_release();
 	return return_value;
 }
 
@@ -576,9 +576,9 @@ void munmap(int mapid){
 		if(mmap_e->spt_e->map_id == mapid){
 			// printf("begin! map id : %d, addr %p\n", mapid, mmap_e->spt_e);
 			if(pagedir_is_dirty(thread_current()->pagedir, mmap_e->spt_e->user_vaddr)){
-				filelock_acquire();
+				// filelock_acquire();
 				file_write_at(mmap_e->spt_e->file, mmap_e->spt_e->user_vaddr, mmap_e->spt_e->read_bytes, mmap_e->spt_e->offset);
-				filelock_release();
+				// filelock_release();
 				free_frame(pagedir_get_page(thread_current()->pagedir, mmap_e->spt_e->user_vaddr));
 				free_page(&mmap_e->spt_e->elem);
 				e = list_remove(e);
