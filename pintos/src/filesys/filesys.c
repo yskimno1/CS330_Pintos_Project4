@@ -32,12 +32,12 @@ parse_dir (const char *name){
   // printf("namecopy : %s\n", name_copy);
   if (*name_copy=='/'){    // '/' means root directory 
     dir = dir_open_root();
-    printf("open root done\n");
+
   }
   else if (thread_current()->current_dir == NULL){ // if NULL, root as default
 
     dir = dir_open_root();
-    printf("open root done2\n");
+
   }
   else{
     dir = dir_reopen(thread_current()->current_dir);
@@ -51,7 +51,7 @@ parse_dir (const char *name){
     next_dir = strtok_r(NULL, "/",&saveptr);
 
   if(dir_name == NULL && next_dir == NULL){
-    printf("came here\n");
+
     free(name_copy);
     return dir;
   }
@@ -96,7 +96,6 @@ parse_dir (const char *name){
   return dir;
 }
 
-
 char* 
 parse_file(const char *name){
 
@@ -109,14 +108,13 @@ parse_file(const char *name){
   next_token = strtok_r(name_copy, "/",&saveptr);
 
   while(next_token != NULL){
-    printf("next token : %s\n", next_token);
+
     token = next_token;
     next_token = strtok_r(NULL, "/", &saveptr);
   }
-  printf("while done, next token : %s, token : %s\n", next_token, token);
+
   char* result = (char* )malloc(strlen(token)+1);
   strlcpy(result, token, strlen(token)+1);
-  printf("while done, result: %s\n", result);
 
   free(name_copy);
 
@@ -160,22 +158,22 @@ filesys_done (void)
 bool
 filesys_create (const char *name, off_t initial_size, bool is_dir) 
 {
-  printf("filesys create\n");
+
   disk_sector_t inode_sector = 0;
   // struct dir *dir = dir_open_root ();
   struct dir* dir = parse_dir(name);
-  printf("parse dir done\n");
+
   char* filename = parse_file(name);
-  printf("parse file done\n");
+
 
   if (dir==NULL || !strcmp(name, "")){
     dir_close (dir);
     free(filename);
-    printf("done\n");
+
     return false;
   }
 
-  printf("parse done\n");
+
   bool success = (dir != NULL
                   && free_map_allocate (1, &inode_sector)
                   && inode_create (inode_sector, initial_size, is_dir)
@@ -207,18 +205,15 @@ filesys_open (const char *name)
   struct inode *inode = NULL;
   if(dir==NULL) passed = false;
   if(dir != NULL){
-    printf("before parse file done, name : %s\n", name);
+
     char* filename = parse_file(name);
-    printf("----\n");
-    printf("inumber : %d\n", inode_get_inumber(dir_get_inode(dir))==ROOT_DIR_SECTOR);
-    printf("filename length : %d\n", strlen(filename));
-    printf("----\n");
+
     if(strcmp(filename, ".")==0){
       free(filename);
       return (struct file* )dir;
     }
     else if(inode_get_inumber(dir_get_inode(dir))==ROOT_DIR_SECTOR && strlen(filename)==0){
-      printf("have to come here\n");
+
       free(filename);
       return (struct file* )dir;
     }
@@ -233,7 +228,7 @@ filesys_open (const char *name)
         passed=true;
       }
     }
-    else printf("else..\n");
+
     dir_lookup(dir, filename, &inode);
     free(filename);
   }
