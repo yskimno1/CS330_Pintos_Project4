@@ -366,9 +366,6 @@ int open (const char *file){
   int fd = (t->fd_vld)++;
   t->fdt[fd] = f;
 
-  if (!strcmp(t->name, file)){
-      file_deny_write(f);
-	}
   return fd; 
 }
 
