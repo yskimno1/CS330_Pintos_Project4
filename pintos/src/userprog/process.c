@@ -178,7 +178,7 @@ process_exit (void)
     }
 	}
 
-  
+  file_close(thread_current()->main_file);
   sema_up(&curr->sema_wait);
   /* wait until parent removes the child in the list */
   sema_down(&curr->sema_exited);
@@ -199,7 +199,7 @@ process_exit (void)
     free_page(e);  
   }
   /* close all files */
-  file_close(thread_current()->main_file);
+  
 
   int i;
   for(i=0; i<FILE_MAX; i++){

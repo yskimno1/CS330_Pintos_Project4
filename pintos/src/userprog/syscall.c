@@ -311,11 +311,10 @@ exit (int status){
   struct thread* t = thread_current();
   t->exit_status = status;
   if(thread_current()->is_exited) return;
-  if(!thread_current()->is_exited) file_close(thread_current()->main_file);
+//   if(!thread_current()->is_exited) file_close(thread_current()->main_file);
 
   printf("%s: exit(%d)\n", thread_name(), status);
   int i; 
-  // if(!thread_current()->is_exited) file_close(thread_current()->main_file);
 
   thread_exit ();
 } 
