@@ -21,7 +21,9 @@ test_main (void)
   msg ("creating many levels of files and directories...");
   quiet = true;
   CHECK (mkdir ("start"), "mkdir \"start\"");
+  msg ("mkdir done\n");
   CHECK (chdir ("start"), "chdir \"start\"");
+  msg ("chdir done\n");
   for (i = 0; ; i++) 
     {
       char name[3][READDIR_MAX_LEN + 1];
