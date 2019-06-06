@@ -205,6 +205,9 @@ filesys_open (const char *name)
   if(dir != NULL){
     char* filename = parse_file(name);
     printf("parse file done, name : %s\n", filename);
+    printf("----\n");
+    printf("inumber : %d\n", inode_get_inumber(dir_get_inode(dir)));
+    printf("---]\n");
     if(strcmp(filename, ".")==0){
       free(filename);
       return (struct file* )dir;
