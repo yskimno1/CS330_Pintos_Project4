@@ -204,11 +204,13 @@ filesys_open (const char *name)
   if(dir==NULL) passed = false;
   if(dir != NULL){
     char* filename = parse_file(name);
+    printf("parse file done, name : %s\n", filename);
     if(strcmp(filename, ".")==0){
       free(filename);
       return (struct file* )dir;
     }
     else if(inode_get_inumber(dir_get_inode(dir))==ROOT_DIR_SECTOR && strlen(filename)==0){
+      printf("have to come here\n");
       free(filename);
       return (struct file* )dir;
     }
@@ -219,8 +221,11 @@ filesys_open (const char *name)
         free(filename);
         return NULL; 
       }
-      else passed=true;
+      else{
+        passed=true;
+      }
     }
+    else printf("else..\n");
     dir_lookup(dir, filename, &inode);
     free(filename);
   }
