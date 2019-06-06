@@ -5,6 +5,7 @@
 #include "filesys/filesys.h"
 #include "filesys/inode.h"
 #include "threads/malloc.h"
+#include "threads/thread.h"
 
 /* A directory. */
 struct dir 
@@ -248,10 +249,10 @@ dir_remove (struct dir *dir, const char *name)
   if (!lookup (dir, name, &e, &ofs))
     goto done;
 
-  if(e.inode_sector==thread_current()->current_dir 
-      ||  e.inode_sector==(thread_current()->current_dir)->parent){
-      goto done;
-  }
+  // if(e.inode_sector==thread_current()->current_dir 
+  //     ||  e.inode_sector==dir_parent (thread_current()->current_dir)->parent){
+  //     goto done;
+  // }
 
 
   /* Open inode. */
