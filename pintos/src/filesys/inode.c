@@ -56,7 +56,6 @@ struct inode
     int open_cnt;                       /* Number of openers. */
     bool removed;                       /* True if deleted, false otherwise. */
     int deny_write_cnt;                 /* 0: writes ok, >0: deny writes. */
-    // struct inode_disk data;             /* Inode content. */
 
     off_t length;
     off_t length_shown;
@@ -108,6 +107,7 @@ byte_to_sector (const struct inode *inode, off_t pos)
       return inner_ptr[new_pos/DISK_SECTOR_SIZE];
     }
     /* here, big files - double indirect blocks */
+    printf("come big\n");
     disk_sector_t double_inner_ptr[PTR_PER_BLOCK];
     new_pos = new_pos - DISK_SECTOR_SIZE*NUM_PTRS_INDIR*PTR_PER_BLOCK;
 
@@ -496,7 +496,7 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
     {
       /* Disk sector to read, starting byte offset within sector. */
       disk_sector_t sector_idx = byte_to_sector (inode, offset);
-      printf("----read: sector : %d\n", sector_idx);
+      // printf("----read: sector : %d\n", sector_idx);
       int sector_ofs = offset % DISK_SECTOR_SIZE;
 
       /* Bytes left in inode, bytes left in sector, lesser of the two. */
@@ -565,7 +565,7 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
       // printf("inode length : %d, offset : %d\n", inode_length(inode), offset);
       
       disk_sector_t sector_idx = byte_to_sector (inode, offset);
-      printf("----write: sector : %d\n", sector_idx);
+      // printf("----write: sector : %d\n", sector_idx);
       int sector_ofs = offset % DISK_SECTOR_SIZE;
 
       /* Bytes left in inode, bytes left in sector, lesser of the two. */
