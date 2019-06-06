@@ -36,7 +36,7 @@ test_main (void)
         break;
       printf("1st,,,");
       CHECK ((fd = open (file_name)) > 1, "open \"%s\"", file_name);
-      printf("open done\n")
+      printf("open done\n");
       snprintf (contents, sizeof contents, "contents %d\n", i);
 
       if (write (fd, contents, strlen (contents)) != (int) strlen (contents)) 
