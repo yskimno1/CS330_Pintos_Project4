@@ -106,21 +106,22 @@ byte_to_sector (const struct inode *inode, off_t pos)
       disk_read(filesys_disk, inode->ptrs[idx_ptr], &inner_ptr);
       return inner_ptr[new_pos/DISK_SECTOR_SIZE];
     }
-    /* here, big files - double indirect blocks */
-    disk_sector_t double_inner_ptr[PTR_PER_BLOCK];
-    new_pos = new_pos - DISK_SECTOR_SIZE*NUM_PTRS_INDIR*PTR_PER_BLOCK;
+    else{
+      /* here, big files - double indirect blocks */
+      disk_sector_t double_inner_ptr[PTR_PER_BLOCK];
+      new_pos = new_pos - DISK_SECTOR_SIZE*NUM_PTRS_INDIR*PTR_PER_BLOCK;
 
-    idx_ptr = NUM_PTRS_DIR + NUM_PTRS_INDIR + (new_pos / DISK_SECTOR_SIZE / PTR_PER_BLOCK / PTR_PER_BLOCK);
-    // printf("idx ptr : %d\n", idx_ptr);
-    disk_read(filesys_disk, inode->ptrs[idx_ptr], &inner_ptr);
+      idx_ptr = NUM_PTRS_DIR + NUM_PTRS_INDIR + (new_pos / DISK_SECTOR_SIZE / PTR_PER_BLOCK / PTR_PER_BLOCK);
+      // printf("idx ptr : %d\n", idx_ptr);
+      disk_read(filesys_disk, inode->ptrs[idx_ptr], &inner_ptr);
 
-    new_pos = new_pos - idx_ptr * DISK_SECTOR_SIZE * PTR_PER_BLOCK * PTR_PER_BLOCK;
+      new_pos = new_pos - idx_ptr * DISK_SECTOR_SIZE * PTR_PER_BLOCK * PTR_PER_BLOCK;
 
-    int double_idx_ptr = new_pos / DISK_SECTOR_SIZE / PTR_PER_BLOCK;
-    new_pos = new_pos % (DISK_SECTOR_SIZE*PTR_PER_BLOCK);
-    disk_read(filesys_disk, inner_ptr[double_idx_ptr], &double_inner_ptr);
-    return double_inner_ptr[new_pos/DISK_SECTOR_SIZE];
-    
+      int double_idx_ptr = new_pos / DISK_SECTOR_SIZE / PTR_PER_BLOCK;
+      new_pos = new_pos % (DISK_SECTOR_SIZE*PTR_PER_BLOCK);
+      disk_read(filesys_disk, inner_ptr[double_idx_ptr], &double_inner_ptr);
+      return double_inner_ptr[new_pos/DISK_SECTOR_SIZE];
+    }
     // else ASSERT(0);
   }
     // return inode->start + pos / DISK_SECTOR_SIZE;
@@ -263,6 +264,9 @@ inode_create (disk_sector_t sector, off_t length, bool is_dir)
       if(length > FILE_SIZE_MAX) length = FILE_SIZE_MAX;
       disk_inode->length = length;
       disk_inode->magic = INODE_MAGIC;
+      disk_inode -> is_allocated = 1;
+      if(is_dir) disk_inode->is_dir = 1;
+      else disk_inode->is_dir = 0;
 
       /* need to allocate */
       struct inode* inode = malloc(sizeof(struct inode));
@@ -277,10 +281,12 @@ inode_create (disk_sector_t sector, off_t length, bool is_dir)
       inode_grow(inode, length);
 
       memcpy(&(disk_inode->ptrs), &(inode->ptrs), sizeof(disk_sector_t) * NUM_PTRS);
+      memcpy(&(disk_inode->ptr_idx), &(inode->ptr_idx), sizeof(unsigned));
+      memcpy(&(disk_inode->indir_idx), &(inode->indir_idx), sizeof(unsigned));
+      memcpy(&(disk_inode->double_indir_idx), &(inode->double_indir_idx), sizeof(unsigned));
+      
       free(inode);
-      disk_inode -> is_allocated = 1;
-      if(is_dir) disk_inode->is_dir = 1;
-      else disk_inode->is_dir = 0;
+
       disk_write(filesys_disk, sector, disk_inode);
 
       success = true;
