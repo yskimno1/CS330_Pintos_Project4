@@ -29,7 +29,7 @@ struct inode_disk
     unsigned magic;                     /* Magic number. */
 
     unsigned is_allocated;
-    disk_sector_t start;                /* First data sector. */
+
     disk_sector_t ptrs[NUM_PTRS];
     unsigned ptr_idx;
     unsigned indir_idx;
@@ -37,7 +37,7 @@ struct inode_disk
     unsigned is_dir;
     disk_sector_t parent;
 
-    uint32_t unused[104];               /* Not used. */
+    uint32_t unused[105];               /* Not used. */
   };
 
 /* Returns the number of sectors to allocate for an inode SIZE
@@ -62,7 +62,6 @@ struct inode
     off_t length_shown;
 
     unsigned is_allocated;
-    disk_sector_t start;
     disk_sector_t ptrs[NUM_PTRS];
     unsigned ptr_idx;
     unsigned indir_idx;
@@ -279,7 +278,6 @@ inode_create (disk_sector_t sector, off_t length, bool is_dir)
 
       inode_grow(inode, length);
 
-      memcpy(&(disk_inode->start), &(inode->start), sizeof(disk_sector_t));
       memcpy(&(disk_inode->ptrs), &(inode->ptrs), sizeof(disk_sector_t) * NUM_PTRS);
       free(inode);
       disk_inode -> is_allocated = 1;
@@ -351,7 +349,6 @@ inode_open (disk_sector_t sector)
   disk_read (filesys_disk, inode->sector, inode_disk);
   inode->length = inode_disk->length;
   inode->length_shown = inode_disk->length;
-  inode->start = inode_disk->start;
   inode->is_allocated = inode_disk->is_allocated;
   inode->indir_idx = inode_disk->indir_idx;
   inode->double_indir_idx = inode_disk->double_indir_idx;
@@ -460,7 +457,6 @@ inode_close (struct inode *inode)
         struct inode_disk* inode_disk = malloc(sizeof(struct inode_disk));
 
         inode_disk->length = inode->length;
-        inode_disk->start = inode->start;
         inode_disk->is_allocated = inode->is_allocated;
         inode_disk->indir_idx = inode->indir_idx;
         inode_disk->double_indir_idx = inode->double_indir_idx;
