@@ -33,15 +33,15 @@ test_main (void)
       snprintf (file_name, sizeof file_name, "file%d", i);
       if (!create (file_name, 0))
         break;
-      printf("1st,,,");
+      msg("1st,,,");
       CHECK ((fd = open (file_name)) > 1, "open \"%s\"", file_name);
       snprintf (contents, sizeof contents, "contents %d\n", i);
-      printf("2nd....");
+      msg("2nd....");
       if (write (fd, contents, strlen (contents)) != (int) strlen (contents)) 
         {
-          printf("555...\n");
+          msg("555...\n");
           CHECK (remove (file_name), "remove \"%s\"", file_name);
-          printf("3rd....\n");
+          msg("3rd....\n");
           close (fd);
           break;
         }
