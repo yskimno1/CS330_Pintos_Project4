@@ -106,17 +106,19 @@ parse_file(const char *name){
   char* next_token;
   char* saveptr;
   strlcpy(name_copy, name, strlen(name)+1);
+  printf("name copy : %s\n", name_copy);
   next_token = strtok_r(name_copy, "/",&saveptr);
   while(next_token != NULL){
+    printf("next token : %s\n", next_token);
     token = next_token;
     next_token = strtok_r(NULL, "/", &saveptr);
   }
-  printf("token : %s, %d\n", token, strlen(token));
+
   char* result = (char* )malloc(strlen(token)+1);
   strlcpy(result, token, strlen(token)+1);
 
   free(name_copy);
-  printf("result : %s, %d\n", result, strlen(result));
+
   return result;
 }
 
