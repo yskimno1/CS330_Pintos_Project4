@@ -18,6 +18,7 @@
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 #include "threads/synch.h"
+#include "filesys/inode.h"
 
 #include "vm/page.h"
 #include "vm/frame.h"
@@ -201,7 +202,8 @@ process_exit (void)
   /* close all files */
   int i;
   for(i=0; i<FILE_MAX; i++){
-    file_close(curr->fdt[i]);
+    if(inode_is_dir(file_get_inode(curr->fdt[i]))) dir_close(curr->fdt[i]);
+    else  file_close(curr->fdt[i]);
   }
 
   /* Destroy the current process's page directory and switch back
@@ -354,8 +356,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
       goto done; 
     }
 
-  file_deny_write(file);
-  
+
   /* Read and verify executable header. */
   if (file_read (file, &ehdr, sizeof ehdr) != sizeof ehdr
       || memcmp (ehdr.e_ident, "\177ELF\1\1\1", 7)
@@ -438,10 +439,11 @@ load (const char *file_name, void (**eip) (void), void **esp)
 
   /* Start address. */
   thread_current()->main_file = file;
+
   *eip = (void (*) (void)) ehdr.e_entry;
 
   success = true;
-
+  file_deny_write(file);
  done:
   /* We arrive here whether the load is successful or not. */
   
