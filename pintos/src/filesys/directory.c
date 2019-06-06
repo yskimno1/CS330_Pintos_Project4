@@ -41,12 +41,14 @@ dir_open (struct inode *inode)
     {
       dir->inode = inode;
       dir->pos = 0;
+      printf("return dir\n");
       return dir;
     }
   else
     {
       inode_close (inode);
       free (dir);
+      printf("return null\n");
       return NULL; 
     }
 }
