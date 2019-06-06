@@ -32,11 +32,12 @@ parse_dir (const char *name){
   // printf("namecopy : %s\n", name_copy);
   if (*name_copy=='/'){    // '/' means root directory 
     dir = dir_open_root();
-
+    printf("open root done\n");
   }
   else if (thread_current()->current_dir == NULL){ // if NULL, root as default
 
     dir = dir_open_root();
+    printf("open root done2\n");
   }
   else{
     dir = dir_reopen(thread_current()->current_dir);
