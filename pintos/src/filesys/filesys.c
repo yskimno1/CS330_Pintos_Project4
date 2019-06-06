@@ -46,10 +46,10 @@ parse_dir (const char *name){
 
   /* open directory as parsing */
   dir_name = strtok_r(name_copy, "/",&saveptr);
-
+  printf("dir name : %s\n", dir_name);
   if (dir_name != NULL)
     next_dir = strtok_r(NULL, "/",&saveptr);
-
+  printf("next dir : %s\n", next_dir);
   if(dir_name == NULL && next_dir == NULL){
     free(name_copy);
     return dir;
