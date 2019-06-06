@@ -21,9 +21,8 @@ test_main (void)
   msg ("creating many levels of files and directories...");
   quiet = true;
   CHECK (mkdir ("start"), "mkdir \"start\"");
-  msg ("mkdir done\n");
   CHECK (chdir ("start"), "chdir \"start\"");
-  ASSERT(0);
+
   for (i = 0; ; i++) 
     {
       char name[3][READDIR_MAX_LEN + 1];
@@ -38,7 +37,7 @@ test_main (void)
       msg("1st,,,");
       CHECK ((fd = open (file_name)) > 1, "open \"%s\"", file_name);
       snprintf (contents, sizeof contents, "contents %d\n", i);
-      msg("2nd....");
+      ASSERT(0);
       if (write (fd, contents, strlen (contents)) != (int) strlen (contents)) 
         {
           msg("555...\n");
