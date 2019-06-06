@@ -99,7 +99,8 @@ syscall_handler (struct intr_frame *f)
     thread_exit(); 
     return;
   }
-
+  if(thread_current()->is_exited) return;
+  
   int syscall_func = *(uint32_t* )if_esp;
   uint32_t argv0;
   uint32_t argv1;

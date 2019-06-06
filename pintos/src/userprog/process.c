@@ -179,6 +179,16 @@ process_exit (void)
 	}
 
   file_close(thread_current()->main_file);
+
+  /* close all files */
+  
+  int i;
+  for(i=0; i<FILE_MAX; i++){
+    if(inode_is_dir(file_get_inode(curr->fdt[i]))) dir_close((struct dir*)(curr->fdt[i]));
+    else  file_close(curr->fdt[i]);
+  }
+  if(thread_current()->current_dir != NULL) dir_close(thread_current()->current_dir);
+
   sema_up(&curr->sema_wait);
   /* wait until parent removes the child in the list */
   sema_down(&curr->sema_exited);
@@ -198,15 +208,7 @@ process_exit (void)
     /* need to change bitmap, too.. */
     free_page(e);  
   }
-  /* close all files */
-  
 
-  int i;
-  for(i=0; i<FILE_MAX; i++){
-    if(inode_is_dir(file_get_inode(curr->fdt[i]))) dir_close((struct dir*)(curr->fdt[i]));
-    else  file_close(curr->fdt[i]);
-  }
-  if(thread_current()->current_dir != NULL) dir_close(thread_current()->current_dir);
 
   /* Destroy the current process's page directory and switch back
     to the kernel-only page directory. */
