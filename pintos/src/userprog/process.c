@@ -183,7 +183,6 @@ process_exit (void)
   sema_down(&curr->sema_exited);
 
   /* close all files */
-  file_close(thread_current()->main_file);
   int i;
   for(i=0; i<FILE_MAX; i++){
     if(curr->fdt[i]==NULL) continue;

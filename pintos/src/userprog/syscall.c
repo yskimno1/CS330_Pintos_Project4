@@ -94,7 +94,7 @@ syscall_handler (struct intr_frame *f)
 {
   void* if_esp = f->esp;
   if(is_kernel_vaddr(if_esp)){
-	// if(!thread_current()->is_exited) file_close(thread_current()->main_file);
+	if(!thread_current()->is_exited) file_close(thread_current()->main_file);
 
     thread_exit(); 
     return;
@@ -312,7 +312,7 @@ exit (int status){
   struct thread* t = thread_current();
   t->exit_status = status;
   if(thread_current()->is_exited) return;
-//   if(!thread_current()->is_exited) file_close(thread_current()->main_file);
+  if(!thread_current()->is_exited) file_close(thread_current()->main_file);
 
   printf("%s: exit(%d)\n", thread_name(), status);
   int i; 
