@@ -210,7 +210,7 @@ dir_add (struct dir *dir, const char *name, disk_sector_t inode_sector)
      Otherwise, we'd need to verify that we didn't get a short
      read due to something intermittent such as low memory. */
   struct inode* inode = inode_open(inode_sector);
-  inode_set_parent(inode, inode_get_inumber(dir_get_inode(dir)));
+  inode_set_parent(inode, inode_get_inumber(dir->inode));
   inode_close(inode);
 
   for (ofs = 0; inode_read_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
@@ -289,8 +289,9 @@ dir_remove (struct dir *dir, const char *name)
   success = true;
 
  done:
-  inode_close (inode);
   inode_lock_release(dir_get_inode(dir));
+  inode_close (inode);
+
   return success;
 }
 

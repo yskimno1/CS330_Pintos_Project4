@@ -186,7 +186,7 @@ void inode_grow(struct inode* inode, off_t length){
         inode->indir_idx = 0;
         idx += 1;
       }
-      else  ASSERT(sectors ==0);
+      else printf("wrong\n");
     }
 
     /* indirect level 2 */
@@ -222,7 +222,7 @@ void inode_grow(struct inode* inode, off_t length){
           inode->double_indir_idx = 0;
           indir_idx += 1;
         }
-        else ASSERT(0);
+        // else ASSERT(0);
       }
       inode->indir_idx = indir_idx;
       disk_write(filesys_disk, inode->ptrs[idx], &inner_ptr);
@@ -496,6 +496,7 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
     {
       /* Disk sector to read, starting byte offset within sector. */
       disk_sector_t sector_idx = byte_to_sector (inode, offset);
+      printf("----read: sector : %d\n", sector_idx);
       int sector_ofs = offset % DISK_SECTOR_SIZE;
 
       /* Bytes left in inode, bytes left in sector, lesser of the two. */
@@ -564,6 +565,7 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
       // printf("inode length : %d, offset : %d\n", inode_length(inode), offset);
       
       disk_sector_t sector_idx = byte_to_sector (inode, offset);
+      printf("----write: sector : %d\n", sector_idx);
       int sector_ofs = offset % DISK_SECTOR_SIZE;
 
       /* Bytes left in inode, bytes left in sector, lesser of the two. */
