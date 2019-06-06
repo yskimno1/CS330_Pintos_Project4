@@ -23,7 +23,7 @@ test_main (void)
   CHECK (mkdir ("start"), "mkdir \"start\"");
   msg ("mkdir done\n");
   CHECK (chdir ("start"), "chdir \"start\"");
-  msg ("chdir done\n");
+  ASSERT(0);
   for (i = 0; ; i++) 
     {
       char name[3][READDIR_MAX_LEN + 1];
