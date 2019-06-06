@@ -106,7 +106,7 @@ parse_file(const char *name){
   char* next_token;
   char* saveptr;
   strlcpy(name_copy, name, strlen(name)+1);
-  printf("name copy : %s\n", name_copy);
+  printf("name copy : %s, %d\n", name_copy, strlen(name_copy));
   next_token = strtok_r(name_copy, "/",&saveptr);
   while(next_token != NULL){
     printf("next token : %s\n", next_token);
