@@ -113,7 +113,7 @@ free_page(struct list_elem* e){
 bool
 page_handling(struct sup_page_table_entry* spt_e){
 
-    lock_acquire(&lock_frame);
+
     bool success;
 
     if(spt_e->file_type == TYPE_FILE){
@@ -122,7 +122,7 @@ page_handling(struct sup_page_table_entry* spt_e){
     }
     else if(spt_e->file_type == TYPE_MMAP) success = file_handling(spt_e);
     else if(spt_e->file_type == TYPE_SWAP) success = swap_handling(spt_e);
-    lock_release(&lock_frame);
+
 
     return success;
 }
