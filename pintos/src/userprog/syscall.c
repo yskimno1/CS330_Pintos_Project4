@@ -329,8 +329,8 @@ int wait (pid_t pid){
 
 int create (const char *file, unsigned initial_size, void* esp){
 
-  if (!string_validate(file)){
-		filelock_release();
+  if (strcmp(file, "") && !string_validate(file)){
+	filelock_release();
     exit(-1);
   }
 
