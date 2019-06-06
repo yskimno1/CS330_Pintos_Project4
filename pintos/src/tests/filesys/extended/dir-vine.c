@@ -36,19 +36,18 @@ test_main (void)
         break;
       printf("1st,,,");
       CHECK ((fd = open (file_name)) > 1, "open \"%s\"", file_name);
+      printf("open done\n")
       snprintf (contents, sizeof contents, "contents %d\n", i);
 
       if (write (fd, contents, strlen (contents)) != (int) strlen (contents)) 
         {
-          printf("555...\n");
           CHECK (remove (file_name), "remove \"%s\"", file_name);
-          printf("3rd....\n");
           close (fd);
           break;
         }
       printf ("c000..");
       close (fd);
-      printf ("c111..");
+      printf ("c111..\n");
       /* Create directory. */
       snprintf (dir_name, sizeof dir_name, "dir%d", i);
       if (!mkdir (dir_name)) 
@@ -56,7 +55,7 @@ test_main (void)
           CHECK (remove (file_name), "remove \"%s\"", file_name);
           break; 
         }
-      msg("c222..\n");
+      printf("c222..\n");
       /* Check for file and directory. */
       CHECK ((fd = open (".")) > 1, "open \".\"");
       CHECK (readdir (fd, name[0]), "readdir \".\"");
