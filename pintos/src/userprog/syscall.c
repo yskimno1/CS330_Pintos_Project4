@@ -287,9 +287,9 @@ check_page(void* buffer, unsigned size, void* esp){
 			}
 
 			if(ptr >= esp - 32){
-				lock_acquire(&lock_frame);
+
 				bool success = grow_stack(ptr, PAGE_FAULT);
-				lock_release(&lock_frame);
+
 				if(success == false){
 					// filelock_release();
 					exit(-1);
@@ -502,12 +502,12 @@ int mmap(int fd, void* addr){ //needs lazy loading
 		size_t page_zero_bytes = PGSIZE - page_read_bytes;
 		// if(pg_ofs(offset)!=0) break;
 		struct sup_page_table_entry* spt_e = find_page(addr);
-		lock_acquire(&lock_frame);
+
 		if(spt_e == NULL){
 
 			spt_e = allocate_page(addr, false, CREATE_MMAP, page_read_bytes, page_zero_bytes, f_reopen, offset, true);
 			if(spt_e == NULL){
-				lock_release(&lock_frame);
+
 				// filelock_release();
 				return -1;
 			}
@@ -515,7 +515,7 @@ int mmap(int fd, void* addr){ //needs lazy loading
 			struct page_mmap* mmap_e = malloc(sizeof(struct page_mmap));
 			if(mmap_e == NULL){
 				free(spt_e);
-				lock_release(&lock_frame);
+
 				// filelock_release();
 				return -1;
 			}
@@ -527,7 +527,7 @@ int mmap(int fd, void* addr){ //needs lazy loading
 			bool success = page_insert(spt_e);
 			if(success == false){
 				list_remove(&mmap_e->elem_mmap);
-				lock_release(&lock_frame);
+
 				// filelock_release();
 				return -1;
 			}
@@ -536,7 +536,7 @@ int mmap(int fd, void* addr){ //needs lazy loading
 			struct page_mmap* mmap_e = malloc(sizeof(struct page_mmap));
 			if(mmap_e == NULL){
 				free(spt_e);
-				lock_release(&lock_frame);
+
 				// filelock_release();
 				return -1;
 			}
@@ -548,12 +548,12 @@ int mmap(int fd, void* addr){ //needs lazy loading
 			bool success = page_insert(spt_e);
 			if(success == false){
 				list_remove(&mmap_e->elem_mmap);
-				lock_release(&lock_frame);
+
 				// filelock_release();
 				return -1;
 			}
 		}
-		lock_release(&lock_frame);
+
 		/* do we need to check other mmaps? */
 		read_bytes -= page_read_bytes;
 		zero_bytes -= page_zero_bytes;
@@ -569,7 +569,6 @@ int mmap(int fd, void* addr){ //needs lazy loading
 
 void munmap(int mapid){
 
-	lock_acquire(&lock_frame);
 	struct list_elem* e;
 	e = list_begin(&thread_current()->list_mmap);
 	while(e!=list_end(&thread_current()->list_mmap)){
@@ -592,7 +591,7 @@ void munmap(int mapid){
 		}
 		else	e = list_next(e);
 	}
-	lock_release(&lock_frame);
+
 	return;
 }
 
