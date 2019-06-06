@@ -433,11 +433,12 @@ int write (int fd, const void *buffer, unsigned size, void* esp){
 
 	if (fd == 1){
 		putbuf (buffer, size);
-    return size;  
+    	return size;  
 	}
 
 	struct thread* t = thread_current();
 	struct file* f = t->fdt[fd];
+	if(f==NULL) return -1;
 	// filelock_acquire();
 	cnt = file_write(f, buffer, size);	
 	// filelock_release();
