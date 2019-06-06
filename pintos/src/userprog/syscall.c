@@ -468,11 +468,11 @@ void close (int fd){
 	struct thread* t = thread_current();
 	struct file* f = t->fdt[fd];
 
-	t->fdt[fd] = NULL;
 	if(f==NULL) return;
 	if(inode_is_dir(file_get_inode(f))) dir_close((struct dir*)(f));
     else  file_close(f);
 
+	t->fdt[fd] = NULL;
 	return;
 	// filelock_release();
 }

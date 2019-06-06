@@ -182,14 +182,6 @@ process_exit (void)
   /* wait until parent removes the child in the list */
   sema_down(&curr->sema_exited);
 
-  /* close all files */
-  int i;
-  for(i=0; i<FILE_MAX; i++){
-    if(curr->fdt[i]==NULL) continue;
-    if(inode_is_dir(file_get_inode(curr->fdt[i]))) dir_close((struct dir*)(curr->fdt[i]));
-    else  file_close(curr->fdt[i]);
-  }
-  if(thread_current()->current_dir != NULL) dir_close(thread_current()->current_dir);
 
   if(!list_empty(&thread_current()->list_mmap)){
 		for(e=list_begin(&thread_current()->list_mmap); e!=list_end(&thread_current()->list_mmap); e=list_next(e)){
@@ -206,6 +198,15 @@ process_exit (void)
     free_page(e);  
   }
 
+  /* close all files */
+  int i;
+  for(i=0; i<FILE_MAX; i++){
+    if(curr->fdt[i]==NULL) continue;
+    if(inode_is_dir(file_get_inode(curr->fdt[i]))) dir_close((struct dir*)(curr->fdt[i]));
+    else  file_close(curr->fdt[i]);
+  }
+  
+  if(thread_current()->current_dir != NULL) dir_close(thread_current()->current_dir);
 
   /* Destroy the current process's page directory and switch back
     to the kernel-only page directory. */
