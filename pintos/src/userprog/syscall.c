@@ -100,7 +100,7 @@ syscall_handler (struct intr_frame *f)
     return;
   }
   if(thread_current()->is_exited) return;
-  
+
   int syscall_func = *(uint32_t* )if_esp;
   uint32_t argv0;
   uint32_t argv1;
@@ -467,8 +467,13 @@ void close (int fd){
 	// filelock_acquire();
 	struct thread* t = thread_current();
 	struct file* f = t->fdt[fd];
+
 	t->fdt[fd] = NULL;
-	file_close(f);
+	if(f==NULL) return;
+	if(inode_is_dir(file_get_inode(f))) dir_close((struct dir*)(f));
+    else  file_close(f);
+
+	return;
 	// filelock_release();
 }
 
