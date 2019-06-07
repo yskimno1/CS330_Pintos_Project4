@@ -13,9 +13,9 @@
 #define INODE_MAGIC 0x494e4f44
 
 #define NUM_PTRS 15
-#define NUM_PTRS_DIR 0
-#define NUM_PTRS_INDIR 11
-#define NUM_PTRS_DOUBLE 4
+#define NUM_PTRS_DIR 4
+#define NUM_PTRS_INDIR 10
+#define NUM_PTRS_DOUBLE 1
 
 #define FILE_SIZE_MAX 1<<23
 
@@ -110,7 +110,8 @@ byte_to_sector (const struct inode *inode, off_t pos)
       disk_sector_t double_inner_ptr[PTR_PER_BLOCK];
       new_pos = new_pos - DISK_SECTOR_SIZE*NUM_PTRS_INDIR*PTR_PER_BLOCK;
       idx_ptr = NUM_PTRS_DIR + NUM_PTRS_INDIR + (new_pos / (DISK_SECTOR_SIZE * PTR_PER_BLOCK * PTR_PER_BLOCK));
-
+      ASSERT(idx_ptr == 14);
+      
       disk_read(filesys_disk, inode->ptrs[idx_ptr], &inner_ptr);
       new_pos = new_pos - (idx_ptr-NUM_PTRS_DIR-NUM_PTRS_INDIR) * DISK_SECTOR_SIZE * PTR_PER_BLOCK * PTR_PER_BLOCK;
 
@@ -146,7 +147,7 @@ void inode_grow(struct inode* inode, off_t length){
   static char data_default[DISK_SECTOR_SIZE];
 
   size_t sectors = bytes_to_sectors(length) - bytes_to_sectors(inode->length);
-  // printf("grow sectors : %d, %d - %d\n", sectors, length, inode->length);
+
   unsigned idx = inode->ptr_idx;
   while(idx<NUM_PTRS){
     if(!(sectors > 0)) break;
