@@ -259,12 +259,12 @@ filesys_remove (const char *name)
   char* filename = parse_file(name);
   // struct dir *dir = dir_open_root ();
   bool success = dir != NULL && dir_remove (dir, filename);
-  if(success == false){
+  // if(success == false){
 
-    if(dir!=NULL){printf("dir not null, remove failed\n");
-    ASSERT(0);
-    }
-  }
+  //   if(dir!=NULL){printf("dir not null, remove failed\n");
+  //   ASSERT(0);
+  //   }
+  // }
   // bool success = dir != NULL && dir_remove (dir, name);
   free(filename);
   dir_close (dir);
