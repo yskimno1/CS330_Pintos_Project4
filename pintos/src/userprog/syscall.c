@@ -369,6 +369,7 @@ int open (const char *file){
 //   filelock_release();
   struct thread *t = thread_current();
   int fd = (t->fd_vld)++;
+  printf("fd : %d\n", fd);
   t->fdt[fd] = f;
 
   return fd; 
