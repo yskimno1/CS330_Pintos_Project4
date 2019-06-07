@@ -313,7 +313,7 @@ exit (int status){
 pid_t 
 exec (const char *cmd_line){
 	if (!string_validate(cmd_line))	exit(-1);
-		tid_t pid = process_execute (cmd_line);
+	tid_t pid = process_execute (cmd_line);
 	return pid;
 }
 
@@ -605,11 +605,11 @@ void munmap(int mapid){
 }
 
 bool chdir (const char *dir){
+	if (!string_validate(dir))	exit(-1);
 	struct dir* dir_location = parse_dir(dir);
 	char* filename = parse_file(dir);
 	struct inode *inode = NULL;
 	struct dir* obj_dir = thread_current()->current_dir;
-	
 	if (dir_location==NULL){
 		free(filename);
 		return false;
@@ -630,6 +630,31 @@ bool chdir (const char *dir){
 		if(obj_dir==NULL){
 			free(filename);
 			return false;
+		}
+		else{
+			inode = dir_get_inode(dir_location);
+			if (inode==NULL){
+					dir_close(dir_location);
+					free(filename);
+					return false;
+			}
+			if (!inode_is_dir(inode)){
+					dir_close(dir_location);
+					free(filename);
+					return false;
+			}
+			dir_close(dir_location);
+			struct dir* dir_curr = dir_open(inode);
+			if(dir_curr == NULL){
+				free(filename);
+				return false;
+			}
+			else{
+				obj_dir = dir_curr;
+				thread_current()->current_dir = obj_dir;
+				free(filename);
+				return true;
+			}
 		}
 	}
 	else{
@@ -667,17 +692,28 @@ bool mkdir (char* dir){
 }
 
 bool readdir (int fd, char *name){
+	if (!string_validate(name))	exit(-1);
+
 	if (!fd_validate(fd))
 		return false;
 	struct file* file;
 	struct inode* inode;
 	struct dir* dir;
 	file = file_find_by_fd(fd);
-	if (file==NULL) return false;
+	if (file==NULL){
+		exit(-1);
+		return false;
+	}
 
 	inode = file_get_inode(file);
-	if (inode==NULL) return false;
-	if (!inode_is_dir(inode)) return false;
+	if (inode==NULL){
+		exit(-1);
+		return false;
+	}
+	if (!inode_is_dir(inode)){
+		exit(-1);
+		return false;
+	}
 
 	dir = (struct dir*)file;
 	return dir_readdir(dir, name);
@@ -688,23 +724,36 @@ bool isdir (int fd){
 		return false;
 
 	struct file* file = file_find_by_fd(fd);
-	if (file==NULL) return false;
+	if (file==NULL){
+		exit(-1);
+		return false;
+	}
 
 	struct inode* inode = file_get_inode(file);
-	if (inode==NULL) return false;
+	if (inode==NULL){
+		exit(-1);
+		return false;
+	}
 
 	return inode_is_dir(inode);
 }
 
 int inumber (int fd){
-	if (!fd_validate(fd))
+	if (!fd_validate(fd)){
 		return false;
+	}
 
 	struct file* file = file_find_by_fd(fd);
-	if (file==NULL) return false;
+	if (file==NULL){
+		exit(-1);
+		return false;
+	}
 
 	const struct inode* inode = file_get_inode(file);
-	if (inode==NULL) return false;
+	if (inode==NULL){
+		exit(-1);
+		return false;
+	}
 
 	return inode_get_inumber(inode);
 }
