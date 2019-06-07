@@ -471,7 +471,10 @@ void close (int fd){
 	if(inode_is_dir(file_get_inode(f))) dir_close((struct dir*)(f));
     else  file_close(f);
 
-	file_find_by_fd(fd) = NULL;
+	struct file_entry* fe = file_find(fd);
+	list_remove(&fe->elem_file);
+	free(fe);
+
 	return;
 	// filelock_release();
 }
