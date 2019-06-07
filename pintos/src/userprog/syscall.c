@@ -713,7 +713,7 @@ bool
 fd_validate(int fd){
 	struct thread* t = thread_current();
 	bool val = true;
-	val = val && fd>=0 && fd<FILE_MAX && (fd < (t->fd_vld));
+	val = val && fd>=0 && (fd < (t->fd_vld));
 	if (fd >2 )
 		val = val && (file_find_by_fd(fd) != NULL);
 	return val;

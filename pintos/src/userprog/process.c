@@ -200,11 +200,17 @@ process_exit (void)
 
   /* close all files */
   int i;
-  for(i=0; i<FILE_MAX; i++){
-    if(file_find_by_fd(i)==NULL) continue;
-    if(inode_is_dir(file_get_inode(file_find_by_fd(i)))) dir_close((struct dir*)(file_find_by_fd(i)));
-    else  file_close(file_find_by_fd(i));
-  }
+  struct list_elem* e;
+	struct thread* curr = thread_current();
+	struct file_entry* fe;
+
+	if(!list_empty(&curr->list_file)){
+			for(e=list_begin(&curr->list_file); e!=list_end(&curr->list_file); e = list_next(e)){
+					fe = list_entry(e, struct file_entry, elem_file);
+          list_remove(e);
+          free(fe);
+			} 
+	}
 
   if(thread_current()->current_dir != NULL) dir_close(thread_current()->current_dir);
 
