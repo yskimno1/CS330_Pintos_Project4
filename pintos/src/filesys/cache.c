@@ -164,9 +164,9 @@ void cache_write_behind_loop(void){
 
 void cache_write_behind(void* aux){
     while(1){
-        lock_acquire(&buffer_cache_lock);
+        // lock_acquire(&buffer_cache_lock);
         cache_write_behind_loop();
-        lock_release(&buffer_cache_lock);
+        // lock_release(&buffer_cache_lock);
         timer_sleep(TIMER_PERIOD);
     }
     return;
