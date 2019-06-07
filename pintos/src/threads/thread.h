@@ -83,7 +83,7 @@ typedef int tid_t;
    ready state is on the run queue, whereas only a thread in the
    blocked state is on a semaphore wait list. */
 
-#define FILE_MAX 131
+#define FILE_MAX 256
 struct thread
   {
     /* Owned by thread.c. */
