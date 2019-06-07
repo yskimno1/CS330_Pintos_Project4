@@ -364,8 +364,8 @@ int open (const char *file){
 		// filelock_release();
 		return -1;
 	}
-	struct file_entry* fe = malloc(sizeof(struct file_entry));
-
+	// struct file_entry* fe = malloc(sizeof(struct file_entry));
+	// free(fe);
 //   filelock_release();
   struct thread *t = thread_current();
   int fd = (t->fd_vld)++;
