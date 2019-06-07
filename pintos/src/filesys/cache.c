@@ -8,7 +8,7 @@
 #include "threads/thread.h"
 #include "filesys/cache.h"
 
-#define TIMER_PERIOD 400
+#define TIMER_PERIOD 300
 
 int cache_current_size;
 
