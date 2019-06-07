@@ -22,7 +22,6 @@ test_main (void)
   quiet = true;
   CHECK (mkdir ("start"), "mkdir \"start\"");
   CHECK (chdir ("start"), "chdir \"start\"");
-
   for (i = 0; ; i++) 
     {
       char name[3][READDIR_MAX_LEN + 1];
@@ -34,20 +33,16 @@ test_main (void)
       snprintf (file_name, sizeof file_name, "file%d", i);
       if (!create (file_name, 0))
         break;
-      printf("1st,,,");
       CHECK ((fd = open (file_name)) > 1, "open \"%s\"", file_name);
-      printf("open done\n");
       snprintf (contents, sizeof contents, "contents %d\n", i);
-
       if (write (fd, contents, strlen (contents)) != (int) strlen (contents)) 
         {
           CHECK (remove (file_name), "remove \"%s\"", file_name);
           close (fd);
           break;
         }
-      printf ("c000..");
       close (fd);
-      printf ("c111..\n");
+      
       /* Create directory. */
       snprintf (dir_name, sizeof dir_name, "dir%d", i);
       if (!mkdir (dir_name)) 
@@ -55,7 +50,7 @@ test_main (void)
           CHECK (remove (file_name), "remove \"%s\"", file_name);
           break; 
         }
-      printf("c222..\n");
+
       /* Check for file and directory. */
       CHECK ((fd = open (".")) > 1, "open \".\"");
       CHECK (readdir (fd, name[0]), "readdir \".\"");
