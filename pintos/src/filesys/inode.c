@@ -432,7 +432,7 @@ inode_close (struct inode *inode)
 
               else ASSERT(0);
               
-              index += 1;
+              // index += 1;
             }
           }
           /* deallocate done */
