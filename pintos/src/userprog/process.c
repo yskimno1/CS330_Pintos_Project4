@@ -200,13 +200,13 @@ process_exit (void)
 
   /* close all files */
   int i;
-  struct list_elem* e;
+  struct list_elem* e_file;
 	struct file_entry* fe;
 
 	if(!list_empty(&curr->list_file)){
-			for(e=list_begin(&curr->list_file); e!=list_end(&curr->list_file); e = list_next(e)){
-					fe = list_entry(e, struct file_entry, elem_file);
-          list_remove(e);
+			for(e_file=list_begin(&curr->list_file); e_file!=list_end(&curr->list_file); e_file = list_next(e_file)){
+					fe = list_entry(e_file, struct file_entry, elem_file);
+          list_remove(e_file);
           free(fe);
 			} 
 	}
