@@ -30,35 +30,20 @@ parse_dir (const char *name){
   
   /* open base directory */
   // printf("namecopy : %s\n", name_copy);
-  if (*name_copy=='/'){    // '/' means root directory 
-    dir = dir_open_root();
-
-  }
-  else if (thread_current()->current_dir == NULL){ // if NULL, root as default
-
-    dir = dir_open_root();
-
-  }
-  else{
-    dir = dir_reopen(thread_current()->current_dir);
-
-  }
+  if (*name_copy=='/')  dir = dir_open_root();  // '/' means root directory 
+  else if (thread_current()->current_dir == NULL) dir = dir_open_root();  // if NULL, root as default
+  else dir = dir_reopen(thread_current()->current_dir);
 
   /* open directory as parsing */
   dir_name = strtok_r(name_copy, "/",&saveptr);
 
-  if (dir_name != NULL)
-    next_dir = strtok_r(NULL, "/",&saveptr);
-
+  if(dir_name != NULL) next_dir = strtok_r(NULL, "/",&saveptr);
   if(dir_name == NULL && next_dir == NULL){
-
     free(name_copy);
     return dir;
   }
 
-  // printf("next dir, dir name at start: %s, %s\n", next_dir, dir_name);
   while(next_dir != NULL && dir != NULL){
-
     struct inode* inode;
     if (strcmp(dir_name, ".")==0){
       dir_name = next_dir;
@@ -70,27 +55,20 @@ parse_dir (const char *name){
       if(inode == NULL) return NULL; 
     }
     else{
-      // printf("dir_name : %s\n", dir_name);
-      if (dir_lookup(dir, dir_name, &inode) == false){
 
+      if (dir_lookup(dir, dir_name, &inode) == false){
         free(name_copy);
         return NULL;
       }
 
-      // printf("inode sector : %d, parent %d, dir : %d\n", inode_get_inumber(inode), inode_parent(inode), inode_is_dir(inode));
       if(inode_is_dir(inode)){
-        // printf("inode is directory\n");
         dir_close(dir);
         dir = dir_open(inode);
       }
-      else{
-        inode_close(inode);
-      }
+      else inode_close(inode);
     }
     dir_name = next_dir;
     next_dir = strtok_r(NULL, "/",&saveptr);
-
-    // printf("next dir, dir name at bottom: %s, %s\n", next_dir, dir_name);
   }
   free(name_copy);
   return dir;
@@ -108,7 +86,6 @@ parse_file(const char *name){
   next_token = strtok_r(name_copy, "/",&saveptr);
 
   while(next_token != NULL){
-
     token = next_token;
     next_token = strtok_r(NULL, "/", &saveptr);
   }
@@ -160,19 +137,15 @@ filesys_create (const char *name, off_t initial_size, bool is_dir)
 {
 
   disk_sector_t inode_sector = 0;
-  // struct dir *dir = dir_open_root ();
   struct dir* dir = parse_dir(name);
-
   char* filename = parse_file(name);
-
 
   if (dir==NULL || !strcmp(name, "")){
     dir_close (dir);
     free(filename);
-
+    ASSERT(0);
     return false;
   }
-
 
   bool success = (dir != NULL
                   && free_map_allocate (1, &inode_sector)
@@ -197,13 +170,12 @@ filesys_create (const char *name, off_t initial_size, bool is_dir)
 struct file *
 filesys_open (const char *name)
 {
-  // struct dir *dir = dir_open_root ();
   if(strlen(name)==0) return NULL;
 
   struct dir* dir = parse_dir(name);
-  bool passed = false;
+  bool passed = true;
   struct inode *inode = NULL;
-  if(dir==NULL) passed = false;
+
   if(dir != NULL){
 
     char* filename = parse_file(name);
@@ -213,7 +185,6 @@ filesys_open (const char *name)
       return (struct file* )dir;
     }
     else if(inode_get_inumber(dir_get_inode(dir))==ROOT_DIR_SECTOR && strlen(filename)==0){
-
       free(filename);
       return (struct file* )dir;
     }
@@ -224,12 +195,10 @@ filesys_open (const char *name)
         free(filename);
         return NULL; 
       }
-      else{
-        passed=true;
-      }
+      else  passed=false;
     }
 
-    dir_lookup(dir, filename, &inode);
+    if(passed) dir_lookup(dir, filename, &inode);
     free(filename);
   }
   dir_close(dir);
@@ -239,13 +208,6 @@ filesys_open (const char *name)
     if(inode_is_dir(inode)) return (struct file* )dir_open(inode);
     else return file_open(inode);
   }
-
-
-  // if (dir != NULL)
-  //   dir_lookup (dir, name, &inode);
-  // dir_close (dir);
-
-  // return file_open (inode);
 }
 
 /* Deletes the file named NAME.
@@ -257,18 +219,11 @@ filesys_remove (const char *name)
 {
   struct dir* dir = parse_dir(name);
   char* filename = parse_file(name);
-  // struct dir *dir = dir_open_root ();
-  bool success = dir != NULL && dir_remove (dir, filename);
-  // if(success == false){
 
-  //   if(dir!=NULL){printf("dir not null, remove failed\n");
-  //   ASSERT(0);
-  //   }
-  // }
-  // bool success = dir != NULL && dir_remove (dir, name);
+  bool success = dir != NULL && dir_remove (dir, filename);
+
   free(filename);
   dir_close (dir);
- 
 
   return success;
 }
