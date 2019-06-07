@@ -534,8 +534,6 @@ init_thread (struct thread *t, const char *name, int priority)
   sema_init(&t->sema_exited, 0);
   int i;
 
-  for (i=0; i++; i<FILE_MAX)
-    t->fdt[i] = NULL;
 
   t->fd_vld = 3;    //0,1,2 invalid
   list_init(&t->list_children);
