@@ -340,6 +340,7 @@ int create (const char *file, unsigned initial_size, void* esp){
 
 int remove (const char *file){
   if (!string_validate(file) || strlen(file)>14){
+	ASSERT(0);
     return -1;
   }
 	return filesys_remove(file);
@@ -473,6 +474,7 @@ void close (int fd){
     else  file_close(f);
 
 	struct file_entry* fe = file_entry_find_by_fd(fd);
+
 	list_remove(&fe->elem_file);
 	free(fe);
 
