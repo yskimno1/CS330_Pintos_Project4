@@ -111,7 +111,7 @@ byte_to_sector (const struct inode *inode, off_t pos)
       new_pos = new_pos - DISK_SECTOR_SIZE*NUM_PTRS_INDIR*PTR_PER_BLOCK;
       idx_ptr = NUM_PTRS_DIR + NUM_PTRS_INDIR + (new_pos / (DISK_SECTOR_SIZE * PTR_PER_BLOCK * PTR_PER_BLOCK));
       ASSERT(idx_ptr == 14);
-      
+
       disk_read(filesys_disk, inode->ptrs[idx_ptr], &inner_ptr);
       new_pos = new_pos - (idx_ptr-NUM_PTRS_DIR-NUM_PTRS_INDIR) * DISK_SECTOR_SIZE * PTR_PER_BLOCK * PTR_PER_BLOCK;
 
@@ -139,7 +139,7 @@ inode_init (void)
   list_init (&open_inodes);
 }
 
-void inode_grow(struct inode* inode, off_t length){
+bool inode_grow(struct inode* inode, off_t length){
   // printf("inode grow start\n");
 
   disk_sector_t inner_ptr[PTR_PER_BLOCK];
@@ -153,7 +153,7 @@ void inode_grow(struct inode* inode, off_t length){
     if(!(sectors > 0)) break;
 
     if(idx<NUM_PTRS_DIR){
-      if(!free_map_allocate(1, &inode->ptrs[idx])) ASSERT(0);
+      if(!free_map_allocate(1, &inode->ptrs[idx])) return -1;
       disk_write(filesys_disk, inode->ptrs[idx], data_default);
       sectors -= 1;
       idx += 1;
@@ -162,7 +162,7 @@ void inode_grow(struct inode* inode, off_t length){
     /* indirect level 1 */
     else if(idx<NUM_PTRS_DIR + NUM_PTRS_INDIR){
       if(inode->indir_idx==0){
-        if(!free_map_allocate(1, &inode->ptrs[idx])) ASSERT(0); // check whether block is allocated
+        if(!free_map_allocate(1, &inode->ptrs[idx])) return -1; // check whether block is allocated
       }
       else{
         disk_read(filesys_disk, inode->ptrs[idx], &inner_ptr);
@@ -170,7 +170,7 @@ void inode_grow(struct inode* inode, off_t length){
       unsigned indir_idx = inode->indir_idx;
       while(indir_idx<PTR_PER_BLOCK){
         if(!(sectors > 0)) break;
-        if(!free_map_allocate(1, &inner_ptr[indir_idx])) ASSERT(0);
+        if(!free_map_allocate(1, &inner_ptr[indir_idx])) return -1;
         disk_write(filesys_disk, inner_ptr[indir_idx], data_default);
 
         indir_idx += 1;
@@ -188,7 +188,7 @@ void inode_grow(struct inode* inode, off_t length){
     /* indirect level 2 */
     else if(idx<NUM_PTRS_DIR + NUM_PTRS_INDIR + NUM_PTRS_DOUBLE){
       if(inode->indir_idx==0 && inode->double_indir_idx==0){ //initial condition
-        if(!free_map_allocate(1, &inode->ptrs[idx])) ASSERT(0);
+        if(!free_map_allocate(1, &inode->ptrs[idx])) return -1;
       }
       else{
         disk_read(filesys_disk, inode->ptrs[idx], &inner_ptr);
@@ -197,7 +197,7 @@ void inode_grow(struct inode* inode, off_t length){
       while(indir_idx<PTR_PER_BLOCK){
         if(!(sectors > 0)) break;
         if(inode->double_indir_idx==0){
-          if(!free_map_allocate(1, &inner_ptr[inode->indir_idx])) ASSERT(0);
+          if(!free_map_allocate(1, &inner_ptr[inode->indir_idx])) return -1;
         }
         else{
           disk_read(filesys_disk, inner_ptr[inode->indir_idx], &double_inner_ptr);
@@ -205,7 +205,7 @@ void inode_grow(struct inode* inode, off_t length){
         unsigned double_indir_idx = inode->double_indir_idx;
         while(double_indir_idx<PTR_PER_BLOCK){
           if(!(sectors > 0)) break;
-          if(!free_map_allocate(1, &double_inner_ptr[double_indir_idx])) ASSERT(0);
+          if(!free_map_allocate(1, &double_inner_ptr[double_indir_idx])) return -1;
           disk_write(filesys_disk, double_inner_ptr[double_indir_idx], data_default);
 
           double_indir_idx += 1;
@@ -227,14 +227,13 @@ void inode_grow(struct inode* inode, off_t length){
         inode->indir_idx = 0;
         idx += 1;
       }
-      else  ASSERT(sectors ==0);
 
     }
   }
   
   inode->ptr_idx = idx;
   inode->is_allocated = 1;
-  return;
+  return 1;
 }
 
 /* Initializes an inode with LENGTH bytes of data and
@@ -275,7 +274,10 @@ inode_create (disk_sector_t sector, off_t length, bool is_dir)
       if(is_dir) inode->is_dir = 1;
       else inode->is_dir = 0;
 
-      inode_grow(inode, length);
+      if(inode_grow(inode, length) == -1){
+        free(disk_inode);
+        return success;
+      }
 
       memcpy(&(disk_inode->ptrs), &(inode->ptrs), sizeof(disk_sector_t) * NUM_PTRS);
       disk_inode->double_indir_idx = inode->double_indir_idx;
@@ -318,6 +320,7 @@ inode_open (disk_sector_t sector)
 
   /* Allocate memory. */
   inode = malloc (sizeof *inode);
+  lock_init(&inode->lock);
   if (inode == NULL)
     return NULL;
 
@@ -341,7 +344,6 @@ inode_open (disk_sector_t sector)
   inode->is_dir = inode_disk->is_dir;
   inode->parent = inode_disk->parent;
   memcpy(&(inode->ptrs), &(inode_disk->ptrs), sizeof(disk_sector_t) * NUM_PTRS );
-  lock_init(&inode->lock);
 
   free(inode_disk);
   return inode;
@@ -441,6 +443,7 @@ inode_close (struct inode *inode)
         struct inode_disk* inode_disk = malloc(sizeof(struct inode_disk));
 
         inode_disk->length = inode->length;
+        inode_disk->magic = INODE_MAGIC;
         inode_disk->is_allocated = inode->is_allocated;
         inode_disk->indir_idx = inode->indir_idx;
         inode_disk->double_indir_idx = inode->double_indir_idx;
@@ -474,7 +477,6 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
   if(inode->length_shown <= offset) return 0;
   uint8_t *buffer = buffer_;
   off_t bytes_read = 0;
-
 
   while (size > 0) 
     {
@@ -529,7 +531,9 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
   if(size+offset > inode_length(inode)){
     // printf("need to grow about %d!\n", size+offset);
 
-    inode_grow(inode, size+offset);
+    if(inode_grow(inode, size+offset)==-1){
+      return 0;
+    }
 
     inode->length = size+offset;
   }
@@ -576,7 +580,6 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
       offset += chunk_size;
       bytes_written += chunk_size;
 
-      // i = i+1;
     }
 
   return bytes_written;
