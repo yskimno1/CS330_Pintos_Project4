@@ -175,4 +175,5 @@ void filelock_acquire(void);
 void filelock_release(void);
 
 struct file* file_find_by_fd(int fd);
+struct file* file_entry_find_by_fd(int fd);
 #endif /* threads/thread.h */

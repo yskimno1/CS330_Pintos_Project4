@@ -681,6 +681,24 @@ filelock_release(){
 }
 
 struct file*
+file_entry_find_by_fd(int fd){
+	struct list_elem* e;
+	int matched = 0;
+	struct thread* curr = thread_current();
+	struct file_entry* fe;
+
+	if(!list_empty(&curr->list_file)){
+			for(e=list_begin(&curr->list_file); e!=list_end(&curr->list_file); e = list_next(e)){
+					fe = list_entry(e, struct file_entry, elem_file);
+					if(fe->fd == fd){
+						return fe;
+					} 
+			}
+	}
+	return NULL;
+}
+
+struct file*
 file_find_by_fd(int fd){
 	struct list_elem* e;
 	int matched = 0;

@@ -472,7 +472,7 @@ void close (int fd){
 	if(inode_is_dir(file_get_inode(f))) dir_close((struct dir*)(f));
     else  file_close(f);
 
-	struct file_entry* fe = file_find_by_fd(fd);
+	struct file_entry* fe = file_entry_find_by_fd(fd);
 	list_remove(&fe->elem_file);
 	free(fe);
 
