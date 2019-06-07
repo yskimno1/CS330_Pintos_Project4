@@ -206,7 +206,7 @@ process_exit (void)
 	if(!list_empty(&curr->list_file)){
 			for(e_file=list_begin(&curr->list_file); e_file!=list_end(&curr->list_file); e_file = list_next(e_file)){
 					fe = list_entry(e_file, struct file_entry, elem_file);
-          if(inode_is_dir(file_get_inode(fe->file))) dir_close((struct_dir* )(fe->file));
+          if(inode_is_dir(file_get_inode(fe->file))) dir_close((fe->file));
           else file_close(fe->file);
           list_remove(e_file);
           free(fe);
