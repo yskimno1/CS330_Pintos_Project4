@@ -297,8 +297,8 @@ dir_remove (struct dir *dir, const char *name)
   success = true;
 
  done:
-  inode_lock_release(dir_get_inode(dir));
   inode_close (inode);
+  inode_lock_release(dir_get_inode(dir));
 
   return success;
 }

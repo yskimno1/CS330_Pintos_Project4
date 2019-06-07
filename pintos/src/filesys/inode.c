@@ -14,8 +14,8 @@
 
 #define NUM_PTRS 15
 #define NUM_PTRS_DIR 0
-#define NUM_PTRS_INDIR 13
-#define NUM_PTRS_DOUBLE 2
+#define NUM_PTRS_INDIR 11
+#define NUM_PTRS_DOUBLE 4
 
 #define FILE_SIZE_MAX 1<<23
 

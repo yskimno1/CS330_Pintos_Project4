@@ -147,6 +147,7 @@ void cache_write(disk_sector_t sector_idx, uint8_t* buffer, off_t bytes_read, in
 void cache_write_behind_loop(void){
     struct list_elem* e;
     struct buffer_cache* cache_e;
+    lock_acquire(&buffer_cache_lock);
 
     if(!list_empty(&buffer_cache_list)){
         for(e=list_begin(&buffer_cache_list); e!=list_end(&buffer_cache_list); e=list_next(e)){
@@ -159,14 +160,15 @@ void cache_write_behind_loop(void){
             }
         }
     }
+    lock_release(&buffer_cache_lock);
     return;
 }
 
 void cache_write_behind(void* aux){
     while(1){
-        lock_acquire(&buffer_cache_lock);
+
         cache_write_behind_loop();
-        lock_release(&buffer_cache_lock);
+
         timer_sleep(TIMER_PERIOD);
     }
     return;
