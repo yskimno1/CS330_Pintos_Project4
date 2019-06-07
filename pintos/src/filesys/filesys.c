@@ -143,7 +143,6 @@ filesys_create (const char *name, off_t initial_size, bool is_dir)
   if (dir==NULL || !strcmp(name, "")){
     dir_close (dir);
     free(filename);
-    ASSERT(0);
     return false;
   }
 
@@ -153,7 +152,7 @@ filesys_create (const char *name, off_t initial_size, bool is_dir)
                   && dir_add (dir, filename, inode_sector));
   
   if (!success && inode_sector != 0) 
-    free_map_release (inode_sector, 1);
+  free_map_release (inode_sector, 1);
 
   dir_close (dir);
   free(filename);
