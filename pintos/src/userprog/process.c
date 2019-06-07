@@ -201,7 +201,6 @@ process_exit (void)
   /* close all files */
   int i;
   struct list_elem* e;
-	struct thread* curr = thread_current();
 	struct file_entry* fe;
 
 	if(!list_empty(&curr->list_file)){
