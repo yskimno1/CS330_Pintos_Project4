@@ -360,7 +360,7 @@ int open (const char *file){
 //   filelock_release();
 	struct thread *t = thread_current();
 	int fd = (t->fd_vld)++;
-	printf("fd : %d\n", fd);
+	// printf("fd : %d\n", fd);
 	// t->fdt[fd] = f;
     struct file_entry* fe = malloc(sizeof(struct file_entry));
 	fe->fd = fd;
