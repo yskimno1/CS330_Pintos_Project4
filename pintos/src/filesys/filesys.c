@@ -140,11 +140,11 @@ filesys_create (const char *name, off_t initial_size, bool is_dir)
   struct dir* dir = parse_dir(name);
   char* filename = parse_file(name);
 
-  if (dir==NULL || !strcmp(name, "")){
-    dir_close (dir);
-    free(filename);
-    return false;
-  }
+  // if (dir==NULL || !strcmp(name, "")){
+  //   dir_close (dir);
+  //   free(filename);
+  //   return false;
+  // }
 
   bool success = (dir != NULL
                   && free_map_allocate (1, &inode_sector)

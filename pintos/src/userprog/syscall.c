@@ -323,13 +323,13 @@ int wait (pid_t pid){
 
 int create (const char *file, unsigned initial_size, void* esp){
 
-if (strcmp(file, "") && !string_validate(file)){
-	// filelock_release();
-	exit(-1);
-}
+	if (strcmp(file, "") && !string_validate(file)){
+		// filelock_release();
+		exit(-1);
+	}
 
-if (strlen(file)>14){
-	return 0;
+	if (strlen(file)>14){
+		return 0;
 	}
 
 	check_page(file, initial_size, esp);
@@ -342,7 +342,7 @@ int remove (const char *file){
 		ASSERT(0);
 		return -1;
 	}
-		return filesys_remove(file);
+	return filesys_remove(file);
 }
 
 int open (const char *file){
@@ -357,7 +357,7 @@ if (!string_validate(file) || strlen(file)>14) return -1;
 	}
 
 
-//   filelock_release();
+	//   filelock_release();
 	struct thread *t = thread_current();
 	int fd = (t->fd_vld)++;
 
@@ -662,6 +662,7 @@ bool chdir (const char *dir){
 }
 
 bool mkdir (char* dir){
+	if (!string_validate(dir))	exit(-1);
 	return filesys_create(dir, 0, true);   
 }
 
