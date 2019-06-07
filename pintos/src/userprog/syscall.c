@@ -459,15 +459,16 @@ int tell (int fd){
 }
 
 void close (int fd){
+	struct thread* t = thread_current();
+	struct file* f = file_find_by_fd(fd);
+	if(f==NULL) return;
+
 	if (!fd_validate(fd)){
 		exit(-1);
 		return;
 	}
 	// filelock_acquire();
-	struct thread* t = thread_current();
-	struct file* f = file_find_by_fd(fd);
 
-	if(f==NULL) return;
 	if(inode_is_dir(file_get_inode(f))) dir_close((struct dir*)(f));
     else  file_close(f);
 
