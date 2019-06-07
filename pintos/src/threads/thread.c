@@ -533,8 +533,10 @@ init_thread (struct thread *t, const char *name, int priority)
   sema_init(&t->sema_wait, 0);
   sema_init(&t->sema_exited, 0);
   int i;
+
   for (i=0; i++; i<FILE_MAX)
     t->fdt[i] = NULL;
+
   t->fd_vld = 3;    //0,1,2 invalid
   list_init(&t->list_children);
   list_init(&t->sup_page_table);
@@ -676,4 +678,22 @@ void
 filelock_release(){
 
   lock_release(&filelock);
+}
+
+struct file*
+file_find_by_fd(int fd){
+	struct list_elem* e;
+	int matched = 0;
+	struct thread* curr = thread_current();
+	struct file_entry* fe;
+
+	if(!list_empty(&curr->list_file)){
+			for(e=list_begin(&curr->list_file); e!=list_end(&curr->list_file); e = list_next(e)){
+					fe = list_entry(e, struct file_entry, elem_file);
+					if(fe->fd == fd){
+						return fe->file;
+					} 
+			}
+	}
+	return NULL;
 }

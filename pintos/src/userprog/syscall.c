@@ -16,12 +16,7 @@
 #include "vm/page.h"
 #include "vm/frame.h"
 #include "filesys/inode.h"
-// struct file 
-//   {
-//     struct inode *inode;        /* File's inode. */
-//     off_t pos;                  /* Current position. */
-//     bool deny_write;            /* Has file_deny_write() been called? */
-//   };
+
 typedef int pid_t;
 
 static void syscall_handler (struct intr_frame *);
@@ -49,11 +44,7 @@ static bool readdir (int fd, char *name);
 static bool isdir (int fd);
 static int inumber (int fd);
 
-struct file_entry{
-	int fd;
-	struct file* file;
-	struct list_elem elem_file;
-};
+
 
 bool
 list_compare_fd(const struct list_elem* a, const struct list_elem* b, void* aux){
@@ -364,22 +355,28 @@ int open (const char *file){
 		// filelock_release();
 		return -1;
 	}
-	// struct file_entry* fe = malloc(sizeof(struct file_entry));
-	// free(fe);
-//   filelock_release();
-  struct thread *t = thread_current();
-  int fd = (t->fd_vld)++;
-  printf("fd : %d\n", fd);
-  t->fdt[fd] = f;
 
-  return fd; 
+
+//   filelock_release();
+	struct thread *t = thread_current();
+	int fd = (t->fd_vld)++;
+	printf("fd : %d\n", fd);
+	// t->fdt[fd] = f;
+    struct file_entry* fe = malloc(sizeof(struct file_entry));
+	fe->fd = fd;
+	fe->file = f;
+	list_push_back(&thread_current()->list_file, &fe->elem_file);
+
+	return fd; 
 }
 
 int filesize (int fd){
   if (!fd_validate(fd)){
     return -1;
   }
-	return file_length(thread_current()->fdt[fd]);
+  
+	// return file_length(thread_current()->fdt[fd]);
+	return file_length(file_find_by_fd(fd));
 }
 
 int read (int fd, void *buffer, unsigned size, void* esp){
@@ -408,10 +405,11 @@ int read (int fd, void *buffer, unsigned size, void* esp){
 
 	else {
 		struct thread* t = thread_current();
-		if (t->fdt[fd]==NULL)
+		struct file* f = file_find_by_fd(fd);
+		if (f==NULL)
 			cnt = -1;
 		else{
-			cnt = file_read(t->fdt[fd], buffer, size);
+			cnt = file_read(f, buffer, size);
 		}
 	}
 	// filelock_release();
@@ -440,7 +438,7 @@ int write (int fd, const void *buffer, unsigned size, void* esp){
 	}
 
 	struct thread* t = thread_current();
-	struct file* f = t->fdt[fd];
+	struct file* f = file_find_by_fd(fd);
 	if(f==NULL) return -1;
 	// filelock_acquire();
 	cnt = file_write(f, buffer, size);	
@@ -450,13 +448,13 @@ int write (int fd, const void *buffer, unsigned size, void* esp){
 
 void seek (int fd, unsigned position){
 	if (!fd_validate(fd))		return;
-	struct file* f = thread_current()->fdt[fd];
+	struct file* f = file_find_by_fd(fd);
   file_seek (f, position);  
 }
 
 int tell (int fd){
 	if (!fd_validate(fd))		return -1;
-	struct file* f = thread_current()->fdt[fd];
+	struct file* f = file_find_by_fd(fd);
 	return file_tell(f);
 }
 
@@ -467,13 +465,13 @@ void close (int fd){
 	}
 	// filelock_acquire();
 	struct thread* t = thread_current();
-	struct file* f = t->fdt[fd];
+	struct file* f = file_find_by_fd(fd);
 
 	if(f==NULL) return;
 	if(inode_is_dir(file_get_inode(f))) dir_close((struct dir*)(f));
     else  file_close(f);
 
-	t->fdt[fd] = NULL;
+	file_find_by_fd(fd) = NULL;
 	return;
 	// filelock_release();
 }
@@ -481,7 +479,7 @@ void close (int fd){
 int mmap(int fd, void* addr){ //needs lazy loading
 	// filelock_acquire();
 	struct thread* curr = thread_current();
-	struct file* f = curr->fdt[fd];
+	struct file* f = file_find_by_fd(fd);
 	if(f == NULL){
 		// filelock_release();
 		return -1;
@@ -670,7 +668,7 @@ bool readdir (int fd, char *name){
    struct file* file;
    struct inode* inode;
    struct dir* dir;
-   file = thread_current()->fdt[fd];
+   file = file_find_by_fd(fd);
    if (file==NULL) return false;
 
    inode = file_get_inode(file);
@@ -685,7 +683,7 @@ bool isdir (int fd){
    if (!fd_validate(fd))
       return false;
 
-   struct file* file = thread_current()->fdt[fd];
+   struct file* file = file_find_by_fd(fd);
    if (file==NULL) return false;
 
    struct inode* inode = file_get_inode(file);
@@ -698,7 +696,7 @@ int inumber (int fd){
    if (!fd_validate(fd))
       return false;
 
-   struct file* file = thread_current()->fdt[fd];
+   struct file* file = file_find_by_fd(fd);
    if (file==NULL) return false;
 
    const struct inode* inode = file_get_inode(file);
@@ -714,7 +712,7 @@ fd_validate(int fd){
 	bool val = true;
 	val = val && fd>=0 && fd<FILE_MAX && (fd < (t->fd_vld));
 	if (fd >2 )
-		val = val && t->fdt[fd] != NULL;
+		val = val && (file_find_by_fd(fd) != NULL);
 	return val;
 }
 

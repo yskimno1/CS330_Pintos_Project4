@@ -201,9 +201,9 @@ process_exit (void)
   /* close all files */
   int i;
   for(i=0; i<FILE_MAX; i++){
-    if(curr->fdt[i]==NULL) continue;
-    if(inode_is_dir(file_get_inode(curr->fdt[i]))) dir_close((struct dir*)(curr->fdt[i]));
-    else  file_close(curr->fdt[i]);
+    if(file_find_by_fd(i)==NULL) continue;
+    if(inode_is_dir(file_get_inode(file_find_by_fd(i)))) dir_close((struct dir*)(file_find_by_fd(i)));
+    else  file_close(file_find_by_fd(i));
   }
 
   if(thread_current()->current_dir != NULL) dir_close(thread_current()->current_dir);

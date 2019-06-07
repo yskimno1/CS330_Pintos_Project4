@@ -83,6 +83,12 @@ typedef int tid_t;
    ready state is on the run queue, whereas only a thread in the
    blocked state is on a semaphore wait list. */
 
+struct file_entry{
+	int fd;
+	struct file* file;
+	struct list_elem elem_file;
+};
+
 #define FILE_MAX 180
 struct thread
   {
@@ -167,4 +173,6 @@ int thread_get_load_avg (void);
 void filelock_init(void);
 void filelock_acquire(void);
 void filelock_release(void);
+
+struct file* file_find_by_fd(int fd);
 #endif /* threads/thread.h */
