@@ -100,9 +100,8 @@ byte_to_sector (const struct inode *inode, off_t pos)
     disk_sector_t inner_ptr[PTR_PER_BLOCK];
     new_pos = pos - DISK_SECTOR_SIZE*NUM_PTRS_DIR;
     if (new_pos < DISK_SECTOR_SIZE*(NUM_PTRS_INDIR * PTR_PER_BLOCK)){
-
       idx_ptr = NUM_PTRS_DIR + (new_pos / DISK_SECTOR_SIZE / PTR_PER_BLOCK);
-      new_pos = new_pos % (DISK_SECTOR_SIZE*PTR_PER_BLOCK);
+      new_pos = (new_pos) % (DISK_SECTOR_SIZE*PTR_PER_BLOCK);
       disk_read(filesys_disk, inode->ptrs[idx_ptr], &inner_ptr);
       return inner_ptr[new_pos/DISK_SECTOR_SIZE];
     }
@@ -110,23 +109,20 @@ byte_to_sector (const struct inode *inode, off_t pos)
       /* here, big files - double indirect blocks */
       disk_sector_t double_inner_ptr[PTR_PER_BLOCK];
       new_pos = new_pos - DISK_SECTOR_SIZE*NUM_PTRS_INDIR*PTR_PER_BLOCK;
+      idx_ptr = NUM_PTRS_DIR + NUM_PTRS_INDIR + (new_pos / (DISK_SECTOR_SIZE * PTR_PER_BLOCK * PTR_PER_BLOCK));
 
-      idx_ptr = NUM_PTRS_DIR + NUM_PTRS_INDIR + (new_pos / DISK_SECTOR_SIZE / PTR_PER_BLOCK / PTR_PER_BLOCK);
-      // printf("idx ptr : %d\n", idx_ptr);
       disk_read(filesys_disk, inode->ptrs[idx_ptr], &inner_ptr);
-
-      new_pos = new_pos - idx_ptr * DISK_SECTOR_SIZE * PTR_PER_BLOCK * PTR_PER_BLOCK;
+      new_pos = new_pos - (idx_ptr-NUM_PTRS_DIR-NUM_PTRS_INDIR) * DISK_SECTOR_SIZE * PTR_PER_BLOCK * PTR_PER_BLOCK;
 
       int double_idx_ptr = new_pos / DISK_SECTOR_SIZE / PTR_PER_BLOCK;
       new_pos = new_pos % (DISK_SECTOR_SIZE*PTR_PER_BLOCK);
       disk_read(filesys_disk, inner_ptr[double_idx_ptr], &double_inner_ptr);
       return double_inner_ptr[new_pos/DISK_SECTOR_SIZE];
     }
-    // else ASSERT(0);
   }
-    // return inode->start + pos / DISK_SECTOR_SIZE;
+
   else{
-    // printf("here..\n");
+
     return -1;
   }
 }
