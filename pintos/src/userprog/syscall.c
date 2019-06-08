@@ -124,14 +124,14 @@ syscall_handler (struct intr_frame *f)
 				// filelock_acquire();
 				int result = create((const char*)argv0, (unsigned)argv1, if_esp);
 				// filelock_release();
-				//if(result == -1){
-				//	exit(-1);
-				//	break;
-				//}
-				//else{
+				if(result == -1){
+					exit(-1);
+					break;
+				}
+				else{
 					f->eax = (bool)result;
 					break;
-				//}
+				}
 
 		case SYS_REMOVE:	/* Delete a file. */
 			argv0 = *p_argv(if_esp+4);
@@ -333,10 +333,11 @@ int create (const char *file, unsigned initial_size, void* esp){
 	}
 
 	check_page(file, initial_size, esp);
-	filelock_acquire();
-	bool create = filesys_create(file, initial_size, false); 
-	filelock_release();
-	return create;
+	//filelock_acquire();
+	//bool create = filesys_create(file, initial_size, false); 
+	//filelock_release();
+	//return create;
+	return filesys_create(file, initial_size, false); 
 }
 
 int remove (const char *file){
