@@ -128,10 +128,10 @@ syscall_handler (struct intr_frame *f)
 				//	exit(-1);
 				//	break;
 				//}
-				else{
+				//else{
 					f->eax = (bool)result;
 					break;
-				}
+				//}
 
 		case SYS_REMOVE:	/* Delete a file. */
 			argv0 = *p_argv(if_esp+4);
