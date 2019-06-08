@@ -77,7 +77,7 @@ void
 syscall_init (void) 
 {
 	intr_register_int (0x30, 3, INTR_ON, syscall_handler, "syscall");
-	//   filelock_init();
+	filelock_init();
 }
 
 static void
@@ -333,8 +333,10 @@ int create (const char *file, unsigned initial_size, void* esp){
 	}
 
 	check_page(file, initial_size, esp);
-
-	return filesys_create(file, initial_size, false); 
+	filelock_acquire();
+	create = filesys_create(file, initial_size, false); 
+	filelock_release();
+	return create;
 }
 
 int remove (const char *file){
