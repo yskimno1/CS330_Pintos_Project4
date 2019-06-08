@@ -334,7 +334,7 @@ int create (const char *file, unsigned initial_size, void* esp){
 
 	check_page(file, initial_size, esp);
 	filelock_acquire();
-	create = filesys_create(file, initial_size, false); 
+	bool create = filesys_create(file, initial_size, false); 
 	filelock_release();
 	return create;
 }
