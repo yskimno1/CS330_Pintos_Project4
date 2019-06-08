@@ -124,10 +124,10 @@ syscall_handler (struct intr_frame *f)
 				// filelock_acquire();
 				int result = create((const char*)argv0, (unsigned)argv1, if_esp);
 				// filelock_release();
-				if(result == -1){
-					exit(-1);
-					break;
-				}
+				//if(result == -1){
+				//	exit(-1);
+				//	break;
+				//}
 				else{
 					f->eax = (bool)result;
 					break;
